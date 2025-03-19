@@ -1,60 +1,81 @@
 import tkinter as tk
-from PIL import Image, ImageTk
+import subprocess
+import sys
 import os
 
-# Création de la fenêtre principale
-root = tk.Tk()
-root.title("Fenêtre Adaptative")
+# Fonction pour fermer la fenêtre
+def fermer_fenetre():
+    fenetre.quit()
 
-# Récupération de la taille de l'écran
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
+# Fonction pour l'action du bouton "Jouer"
+def jouer():
+    print("Lancement de choix_age.py...")
+    fenetre.destroy()  # Ferme la fenêtre actuelle
 
-# Ajustement automatique de la taille de la fenêtre en plein écran sans bordures
-root.overrideredirect(True)  # Supprime la bordure et la barre de titre
-root.geometry(f"{screen_width}x{screen_height}")
-root.attributes("-topmost", True)  # S'assure que la fenêtre reste au premier plan
+    # Obtenir le chemin du répertoire courant
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    script_path = os.path.join(current_dir, "choix_age.py")
 
-# Vérifier si le fichier image existe
-image_path = "C:/Users/valen/Downloads/th.png"
-if not os.path.exists(image_path):
-    print(f"Erreur: L'image à l'emplacement {image_path} n'a pas été trouvée.")
-else:
-    # Charger l'image de fond
-    img = Image.open(image_path)
+    # Vérifier si le fichier existe
+    if os.path.exists(script_path):
+        # Lancer le script choix_age.py
+        if sys.platform.startswith('win'):
+            # Windows
+            subprocess.Popen([sys.executable, script_path])
+        else:
+            # Unix/Linux/Mac
+            subprocess.Popen([sys.executable, script_path])
+    else:
+        print(f"Erreur: Le fichier {script_path} n'a pas été trouvé.")
+        # Alternative: créer un message d'erreur dans une fenêtre
+        error_window = tk.Tk()
+        error_window.title("Erreur")
+        tk.Label(error_window, text=f"Le fichier choix_age.py n'a pas été trouvé.", font=("Arial", 12), fg="red").pack(padx=20, pady=20)
+        tk.Button(error_window, text="OK", command=error_window.destroy).pack(pady=10)
+        error_window.mainloop()
 
-def resize_background(event):
-    """Redimensionne l'image de fond en fonction de la taille de la fenêtre."""
-    if img:  # S'assurer que l'image a bien été chargée
-        new_width = event.width
-        new_height = event.height
-        resized_img = img.resize((new_width, new_height), Image.LANCZOS)
-        background_image = ImageTk.PhotoImage(resized_img)
-        display.config(image=background_image)
-        display.image = background_image  # Garder une référence à l'image
+# Fonction pour l'action du bouton "Wi-Fi"
+def wifi():
+    print("Wi-Fi action!")
 
-# Création du label d'affichage de l'image
-display = tk.Label(root)
-display.place(x=0, y=0, relwidth=1, relheight=1)
+# Créer la fenêtre principale
+fenetre = tk.Tk()
 
-# Lier l'événement de redimensionnement à la fonction correspondante
-root.bind("<Configure>", resize_background)
+# Masquer la barre de menu et les boutons de la fenêtre
+fenetre.overrideredirect(True)  # Supprimer la barre de titre
+fenetre.geometry("1920x1080")  # Taille de la fenêtre
 
-# Ajout d'un bouton pour fermer la fenêtre
-def close_window():
-    root.destroy()
+# Récupérer la taille de l'écran
+largeur_ecran = fenetre.winfo_screenwidth()
+hauteur_ecran = fenetre.winfo_screenheight()
 
-tk.Button(root, text="Fermer la fenêtre", command=close_window, font=("Arial", 14), bg="red", fg="white").pack(side="bottom", pady=20)
+# Adapter la fenêtre à la taille de l'écran
+fenetre.geometry(f"{largeur_ecran}x{hauteur_ecran}+0+0")
 
-# Fonction pour l'action "Jouer"
-def jouer_action():
-    print("Action de jeu ici")
+# Charger l'image à afficher (utilisation de PhotoImage de Tkinter pour les formats supportés)
+image_path = "C:/Users/valen/Downloads/th.png"  # Chemin de l'image
+try:
+    photo = tk.PhotoImage(file=image_path)
+    # Créer un label avec l'image
+    label_image = tk.Label(fenetre, image=photo)
+    label_image.place(relwidth=1, relheight=1)  # Prendre toute la fenêtre
+except Exception as e:
+    print(f"Erreur lors du chargement de l'image: {e}")
+    # Créer un fond de couleur si l'image ne peut pas être chargée
+    label_image = tk.Label(fenetre, bg="light blue")
+    label_image.place(relwidth=1, relheight=1)
 
-# Créer un bouton rond pour jouer au centre de l'image
-bouton_jouer = tk.Button(root, text="Jouer", command=jouer_action, relief="solid", width=8, height=3, 
-                         font=("Arial", 14, "bold"), bg="blue", fg="white", borderwidth=2, 
-                         highlightthickness=0, activebackground="lightblue", activeforeground="white")
-bouton_jouer.place(relx=0.5, rely=0.5, anchor="center")
+# Ajouter un bouton simple "Jouer" au centre
+bouton_jouer = tk.Button(fenetre, text="Jouer", command=jouer, font=("Arial", 20), bg="blue", fg="white", padx=30, pady=15)
+bouton_jouer.place(relx=0.5, rely=0.4, anchor="center")
 
-# Lancement de la boucle principale
-root.mainloop()
+# Ajouter un bouton simple pour la Wi-Fi en bas à droite
+bouton_wifi = tk.Button(fenetre, text="Wi-Fi", command=wifi, font=("Arial", 12), bg="green", fg="white")
+bouton_wifi.place(x=largeur_ecran-100, y=hauteur_ecran-50)
+
+# Créer un bouton pour fermer la fenêtre
+bouton_fermer = tk.Button(fenetre, text="Fermer", command=fermer_fenetre, font=("Arial", 12), bg="red", fg="white")
+bouton_fermer.place(x=largeur_ecran-80, y=20)
+
+# Afficher la fenêtre
+fenetre.mainloop()
