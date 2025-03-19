@@ -10,8 +10,11 @@ def fermer_fenetre():
 # Fonction pour l'action du bouton "Jouer"
 def jouer():
     print("Lancement de choix_age.py...")
-    fenetre.destroy()  # Ferme la fenêtre actuelle
+    
+    # Utiliser `after` pour lancer le script de manière asynchrone
+    fenetre.after(0, lancer_script)  # Lancer la fonction `lancer_script` immédiatement
 
+def lancer_script():
     # Obtenir le chemin du répertoire courant
     current_dir = os.path.dirname(os.path.abspath(__file__))
     script_path = os.path.join(current_dir, "choix_age.py")
@@ -25,12 +28,14 @@ def jouer():
         else:
             # Unix/Linux/Mac
             subprocess.Popen([sys.executable, script_path])
+        # Fermer la fenêtre après avoir lancé le script
+        fenetre.quit()
     else:
         print(f"Erreur: Le fichier {script_path} n'a pas été trouvé.")
         # Alternative: créer un message d'erreur dans une fenêtre
         error_window = tk.Tk()
         error_window.title("Erreur")
-        tk.Label(error_window, text=f"Le fichier choix_age.py n'a pas été trouvé.", font=("Arial", 12), fg="red").pack(padx=20, pady=20)
+        tk.Label(error_window, text=f"Le fichier {script_path} n'a pas été trouvé.", font=("Arial", 12), fg="red").pack(padx=20, pady=20)
         tk.Button(error_window, text="OK", command=error_window.destroy).pack(pady=10)
         error_window.mainloop()
 

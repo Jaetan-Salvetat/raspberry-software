@@ -11,16 +11,16 @@ def fermer_fenetre():
 
 # Fonction pour valider le choix de l'âge
 def valider_age():
-    age_selectionne = age_var.get()
+    age_selectionne = age_var.get()  # Récupère l'âge sélectionné
     print(f"Âge sélectionné: {age_selectionne}")
-    # Ici, vous pourriez lancer un autre script ou effectuer une action en fonction de l'âge
+    
+    # Afficher un message à l'utilisateur avec l'âge sélectionné
+    message_label.config(text=f"Vous avez sélectionné {age_selectionne} ans.")
+    
+    # Ici, vous pouvez lancer un autre script ou effectuer une action en fonction de l'âge
     # Par exemple:
-    # fenetre.destroy()
+    # fenetre.quit()  # Ferme la fenêtre après validation
     # subprocess.Popen(['python', 'autre_script.py', str(age_selectionne)])
-
-# Fonction pour l'action du bouton "Wi-Fi"
-def wifi():
-    print("Wi-Fi action!")
 
 # Créer la fenêtre principale
 fenetre = tk.Tk()
@@ -37,14 +37,10 @@ hauteur_ecran = fenetre.winfo_screenheight()
 # Adapter la fenêtre à la taille de l'écran
 fenetre.geometry(f"{largeur_ecran}x{hauteur_ecran}+0+0")
 
-# Charger l'image à afficher (utiliser le même chemin que dans le script précédent)
+# Charger l'image à afficher avec tk.PhotoImage (remplace PIL par tkinter)
 image_path = "C:/Users/valen/Downloads/th.png"  # Chemin de l'image
 try:
-    image = Image.open(image_path)
-    # Adapter l'image à la taille de la fenêtre
-    image = image.resize((largeur_ecran, hauteur_ecran), Image.Resampling.LANCZOS)
-    # Convertir l'image pour Tkinter
-    photo = ImageTk.PhotoImage(image)
+    photo = tk.PhotoImage(file=image_path)
     # Créer un label avec l'image
     label_image = tk.Label(fenetre, image=photo)
     label_image.place(relwidth=1, relheight=1)  # Prendre toute la fenêtre
@@ -75,9 +71,9 @@ bouton_valider = tk.Button(frame_central, text="Valider", command=valider_age,
                           font=("Arial", 16), bg="blue", fg="white", padx=20, pady=10)
 bouton_valider.pack(pady=20)
 
-# Ajouter un bouton simple pour la Wi-Fi en bas à droite
-bouton_wifi = tk.Button(fenetre, text="Wi-Fi", command=wifi, font=("Arial", 12), bg="green", fg="white")
-bouton_wifi.place(x=largeur_ecran-100, y=hauteur_ecran-50)
+# Ajouter un label pour afficher l'âge sélectionné après la validation
+message_label = tk.Label(fenetre, font=("Arial", 16), bg="white", fg="green")
+message_label.place(relx=0.5, rely=0.8, anchor="center")
 
 # Créer un bouton pour fermer la fenêtre
 bouton_fermer = tk.Button(fenetre, text="Fermer", command=fermer_fenetre, font=("Arial", 12), bg="red", fg="white")
