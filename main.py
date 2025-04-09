@@ -1,61 +1,27 @@
-import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
+import sys
 import os
-from home.home_page import HomePage
-from age_selector.age_selector_page import AgeSelectorPage
-from theme import get_theme
+from pathlib import Path
+from qtpy.QtCore import QUrl
+from qtpy.QtGui import QGuiApplication
+from qtpy.QtQml import QQmlApplicationEngine
 
-class SimpleApp(ttk.Window):
-    def __init__(self):
-        super().__init__(themename="flatly")
-        
-        theme = get_theme()
-        self.style.register_theme(theme)
-        self.style.theme_use("ludobot")
-        
-        self.title("Ludo-Bot")
-        self.attributes("-fullscreen", True)
-        
-        self.app_bg_color = "#DBEBF4"
-        self.configure(bg=self.app_bg_color)
-        
-        style = self.style
-        style.configure('.', font=("Helvetica", 12))
-        style.configure('TLabel', font=("Helvetica", 12))
-        
-        self.setup_container()
-        self.create_pages()
-        self.show_page("HomePage")
-        
-    def setup_container(self):
-        # Configurer le style pour le conteneur
-        style = ttk.Style()
-        style.configure("Container.TFrame", background=self.app_bg_color)
-        
-        # Créer le conteneur avec le style approprié
-        self.container = ttk.Frame(self, style="Container.TFrame")
-        self.container.pack(side="top", fill="both", expand=True, padx=0, pady=0)
-        self.container.grid_rowconfigure(0, weight=1)
-        self.container.grid_columnconfigure(0, weight=1)
-        
-        self.frames = {}
+def main():
+    """
+    Main entry point for the application
+    """
+    app = QGuiApplication(sys.argv)
     
-    def create_pages(self):
-        page_classes = [HomePage, AgeSelectorPage]
-        
-        for page_class in page_classes:
-            page = page_class(self.container, self)
-            self.frames[page_class.__name__] = page
-            page.grid(row=0, column=0, sticky="nsew")
+    engine = QQmlApplicationEngine()
     
-    def show_page(self, page_name):
-        if page_name not in self.frames:
-            print(f"ERREUR: La page {page_name} n'existe pas!")
-            return
-        
-        frame = self.frames[page_name]
-        frame.tkraise()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    qml_file = os.path.join(current_dir, "ui/main.qml")
+    
+    engine.load(QUrl.fromLocalFile(qml_file))
+    
+    if not engine.rootObjects():
+        sys.exit(-1)
+    
+    return app.exec()
 
 if __name__ == "__main__":
-    app = SimpleApp()
-    app.mainloop()  
+    sys.exit(main())
