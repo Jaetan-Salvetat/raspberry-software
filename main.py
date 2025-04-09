@@ -16,6 +16,9 @@ class SimpleApp(ttk.Window):
         self.title("Ludo-Bot")
         self.attributes("-fullscreen", True)
         
+        self.app_bg_color = "#DBEBF4"
+        self.configure(bg=self.app_bg_color)
+        
         style = self.style
         style.configure('.', font=("Helvetica", 12))
         style.configure('TLabel', font=("Helvetica", 12))
@@ -25,8 +28,13 @@ class SimpleApp(ttk.Window):
         self.show_page("HomePage")
         
     def setup_container(self):
-        self.container = ttk.Frame(self, bootstyle="light")
-        self.container.pack(side="top", fill="both", expand=True)
+        # Configurer le style pour le conteneur
+        style = ttk.Style()
+        style.configure("Container.TFrame", background=self.app_bg_color)
+        
+        # Créer le conteneur avec le style approprié
+        self.container = ttk.Frame(self, style="Container.TFrame")
+        self.container.pack(side="top", fill="both", expand=True, padx=0, pady=0)
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
         
