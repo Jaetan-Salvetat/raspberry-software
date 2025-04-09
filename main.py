@@ -1,20 +1,20 @@
 import sys
 import os
 from pathlib import Path
-from qtpy.QtCore import QUrl
-from qtpy.QtGui import QGuiApplication
-from qtpy.QtQml import QQmlApplicationEngine
+from PySide6.QtCore import QUrl
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtQml import QQmlApplicationEngine
+from controllers.settings_controller import SettingsController
 
 def main():
-    """
-    Main entry point for the application
-    """
-    app = QGuiApplication(sys.argv)
-    
+    app = QGuiApplication(sys.argv)    
     engine = QQmlApplicationEngine()
+    settings_controller = SettingsController()
+    settings_controller.initialize_settings()
     
     current_dir = os.path.dirname(os.path.abspath(__file__))
     qml_file = os.path.join(current_dir, "ui/main.qml")
+    engine.rootContext().setContextProperty("settingsController", settings_controller)
     
     engine.load(QUrl.fromLocalFile(qml_file))
     

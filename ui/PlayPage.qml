@@ -22,7 +22,6 @@ Rectangle {
         }
     }
 
-    // Back button with modern styling
     Button {
         id: backButton
         anchors {
@@ -48,7 +47,6 @@ Rectangle {
         onClicked: stackView.pop()
     }
 
-    // Game selection buttons
     ColumnLayout {
         anchors {
             top: titleText.bottom
