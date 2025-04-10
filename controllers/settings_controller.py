@@ -20,10 +20,10 @@ class SettingsController(QObject):
         self._current_language_index = 0
 
     def initialize_settings(self):
-        self.volumeChanged.emit(self._volume)
-        self.vibrationEnabledChanged.emit(self._vibration_enabled)
-        self.languageCodeChanged.emit(self.language_code)
-        self.languageNameChanged.emit(self.language_name)
+        self.volumeChanged.emit(50)
+        self.vibrationEnabledChanged.emit(True)
+        self.languageCodeChanged.emit(self._language_codes[0])
+        self.languageNameChanged.emit(self._language_names[0])
         print("Settings initialized")
 
     @property

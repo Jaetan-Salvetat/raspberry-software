@@ -8,6 +8,9 @@ from controllers.settings_controller import SettingsController
 
 def main():
     app = QGuiApplication(sys.argv)    
+    
+    os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
+    
     engine = QQmlApplicationEngine()
     settings_controller = SettingsController()
     settings_controller.initialize_settings()
