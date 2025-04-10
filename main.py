@@ -13,8 +13,7 @@ def main():
     
     engine = QQmlApplicationEngine()
     settings_controller = SettingsController()
-    settings_controller.initialize_settings()
-    
+
     current_dir = os.path.dirname(os.path.abspath(__file__))
     qml_file = os.path.join(current_dir, "ui/main.qml")
     engine.rootContext().setContextProperty("settingsController", settings_controller)

@@ -52,7 +52,7 @@ QtObject {
     readonly property int animationDurationNormal: 250
     readonly property int animationDurationSlow: 350
     
-    property bool isDarkTheme: true
+    property bool isDarkTheme: settingsController.is_dark_mode
     
     readonly property color backgroundColor: isDarkTheme ? backgroundDark : backgroundLight
     readonly property color surfaceColor: isDarkTheme ? surfaceDark : surfaceLight

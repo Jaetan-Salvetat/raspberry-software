@@ -8,7 +8,6 @@ import "."
 Page {
     id: settingsPage
     background: Rectangle { color: Style.backgroundColor }
-    property QtObject controller: settingsController
 
     header: ToolBar {
         id: toolbar
@@ -86,14 +85,14 @@ Page {
                             Layout.preferredHeight: 40
                             from: 0
                             to: 100
-                            value: controller.volume || 0
+                            value: settingsController.volume
                             live: true
                             snapMode: Slider.SnapAlways
                             stepSize: 1
                             onValueChanged: volumeText.text = Math.round(value) + "%"
                             onPressedChanged: {
                                 if (!pressed)
-                                    controller.set_volume(Math.round(value))
+                                    settingsController.volume = Math.round(value)
                             }
                             Material.accent: Style.accentColor
                         }
@@ -139,38 +138,11 @@ Page {
 
                     Switch {
                         id: vibrationSwitch
-                        checked: controller.vibration_enabled
+                        checked: settingsController.vibration_enabled
                         onCheckedChanged: {
-                            controller.set_vibration_enabled(vibrationSwitch.checked)
+                            settingsController.vibration_enabled = vibrationSwitch.checked
                         }
                         Material.accent: Style.accentColor
-                    }
-                }
-            }
-
-            SettingsCard {
-                title: "Langue"
-                icon: "assets/icons/language.svg"
-                Layout.fillWidth: true
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    Layout.margins: Style.spacingMedium
-                    spacing: Style.spacingMedium
-
-                    ComboBox {
-                        id: languageCombo
-                        model: ["Français", "English"]
-                        currentIndex: 0
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 50
-                        font.family: appFont.family
-                        font.pixelSize: Style.fontSizeMedium
-                        popup.font.pixelSize: Style.fontSizeMedium
-                        Material.foreground: Style.textColorPrimary
-                        onActivated: {
-                            controller.set_language(currentIndex)
-                        }
                     }
                 }
             }
@@ -224,31 +196,12 @@ Page {
 
                     Switch {
                         id: darkModeSwitch
-                        checked: Style.isDarkTheme
+                        checked: settingsController.is_dark_mode
                         onCheckedChanged: {
-                            Style.isDarkTheme = checked
+                            settingsController.is_dark_mode = checked
                         }
                         Material.accent: Style.accentColor
                     }
-                }
-            }
-
-            Button {
-                text: "Enregistrer"
-                Layout.fillWidth: true
-                Layout.preferredHeight: 60
-                Layout.topMargin: Style.spacingMedium
-                Layout.bottomMargin: Style.spacingLarge
-                font.family: appFont.family
-                font.pixelSize: Style.fontSizeMedium
-                font.weight: Font.Medium
-                Material.background: Style.accentColor
-                Material.foreground: "white"
-                font.bold: true
-
-                onClicked: {
-                    controller.save_settings()
-                    stackView.pop()
                 }
             }
         }

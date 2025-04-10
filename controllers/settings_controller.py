@@ -1,65 +1,41 @@
-from PySide6.QtCore import QObject, Signal, Property, Slot
+from PySide6.QtCore import QObject, Property, Signal, QSettings
 
 
 class SettingsController(QObject):
+    isThemeChanged = Signal()
 
     def __init__(self):
         super().__init__()
-        self._volume = 50
-        self._vibration_enabled = True
-        
-        # Liste des langues disponibles
-        self._language_codes = ["fr", "en"]
-        self._language_names = ["Français", "English"]
-        
-        # Langue sélectionnée (index dans la liste)
-        self._current_language_index = 0
+        self._settings = QSettings("LudoBot", "LudoBot")
+        self._volume = self._settings.value("volume", 50)
+        self._vibration_enabled = self._settings.value("vibration_enabled", True)
+        self._is_dark_mode = self._settings.value("is_dark_mode", False)
+        self.isThemeChanged.emit()
 
-    def initialize_settings(self):
-        print("Settings initialized")
-
-    @property
+    @Property(int)
     def volume(self):
         return self._volume
-        
-    @property
+
+    @volume.setter
+    def volume(self, value):
+        self._volume = value
+        self._settings.setValue("volume", value)
+
+    @Property(bool)
     def vibration_enabled(self):
         return self._vibration_enabled
-        
-    @Slot(int)
-    def set_volume(self, volume):
-        self._volume = volume
-    
-    @property
-    def vibration_enabled(self):
-        return self._vibration_enabled
-        
-    @Slot(bool)
-    def set_vibration_enabled(self, enabled):
-        self._vibration_enabled = enabled
-    
-    @property
-    def language_code(self):
-        return self._language_codes[self._current_language_index]
-    
-    @property
-    def language_name(self):
-        return self._language_names[self._current_language_index]
-    
-    @property
-    def language_codes(self):
-        return self._language_codes
-    
-    @property
-    def language_names(self):
-        return self._language_names
-    
-    @Slot(int)
-    def set_language(self, index):
-        if 0 <= index < len(self._language_codes):
-            self._current_language_index = index
-    
-    @Slot()
-    def save_settings(self):
-        print("Settings saved")
-        # Ici, vous pourriez enregistrer les paramètres dans un fichier
+
+    @vibration_enabled.setter
+    def vibration_enabled(self, value):
+        self._vibration_enabled = value
+        self._settings.setValue("vibration_enabled", value)
+
+    @Property(bool, notify=isThemeChanged)
+    def is_dark_mode(self):
+        return self._is_dark_mode
+
+    @is_dark_mode.setter
+    def is_dark_mode(self, value):
+        self._is_dark_mode = value
+        self._settings.setValue("is_dark_mode", value)
+        self.isThemeChanged.emit()
