@@ -1,7 +1,9 @@
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Controls.Material 2.15
+import QtQuick.Controls 2.15
 import QtQuick.Layouts
 import QtQuick.Window
+import QtQuick.Effects
 import "."
 
 ApplicationWindow {
@@ -12,115 +14,241 @@ ApplicationWindow {
     title: "LudoBot"
     flags: Qt.Window | Qt.FramelessWindowHint
     visibility: Window.FullScreen
-    color: Style.primaryColor
+    Material.theme: Style.isDarkTheme ? Material.Dark : Material.Light
+    Material.accent: Style.accentColor
+    Material.primary: Style.primaryColor
+    Material.background: Style.backgroundColor
+
+    property font appFont: Qt.font({
+        family: "Roboto, Arial, Helvetica, sans-serif",
+        pixelSize: Style.fontSizeMedium
+    })
 
     StackView {
         id: stackView
         anchors.fill: parent
         initialItem: homePage
+        pushEnter: Transition {
+            PropertyAnimation {
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: Style.animationDurationNormal
+            }
+        }
+        pushExit: Transition {
+            PropertyAnimation {
+                property: "opacity"
+                from: 1
+                to: 0
+                duration: Style.animationDurationNormal
+            }
+        }
+        popEnter: Transition {
+            PropertyAnimation {
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: Style.animationDurationNormal
+            }
+        }
+        popExit: Transition {
+            PropertyAnimation {
+                property: "opacity"
+                from: 1
+                to: 0
+                duration: Style.animationDurationNormal
+            }
+        }
     }
 
     Component {
         id: homePage
-        Rectangle {
-            color: Style.primaryColor
-
-            Image {
-                id: logoImage
-                source: "assets/LudoBot.png"
-                width: 200
-                height: 200
-                anchors {
-                    top: parent.top
-                    topMargin: 60
-                    horizontalCenter: parent.horizontalCenter
-                }
-                fillMode: Image.PreserveAspectFit
+        Page {
+            background: Rectangle {
+                color: Style.backgroundColor
             }
 
-            Text {
-                id: titleText
-                text: "LudoBot"
-                color: Style.textColorLight
-                font {
-                    pixelSize: Style.fontSizeHeader
-                    bold: true
-                }
-                anchors {
-                    top: logoImage.bottom
-                    topMargin: Style.spacingMedium
-                    horizontalCenter: parent.horizontalCenter
-                }
-            }
+            Rectangle {
+                anchors.fill: parent
+                color: Style.backgroundColor
 
-            ColumnLayout {
-                anchors {
-                    top: titleText.bottom
-                    topMargin: Style.spacingLarge
-                    horizontalCenter: parent.horizontalCenter
-                }
-                spacing: Style.spacingMedium
-                width: parent.width * 0.4
+                Item {
+                    id: headerSection
+                    width: parent.width
+                    height: parent.height * 0.4
+                    anchors.top: parent.top
 
-                MainMenuButton {
-                    text: "Jouer"
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 70
-                    onClicked: stackView.push("PlayPage.qml")
-                }
+                    Image {
+                        id: logoImage
+                        source: "assets/LudoBot.png"
+                        width: 200
+                        height: 200
+                        anchors.centerIn: parent
+                        fillMode: Image.PreserveAspectFit
 
-                MainMenuButton {
-                    text: "Wifi"
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 70
-                    onClicked: stackView.push("WifiPage.qml")
-                }
-
-                MainMenuButton {
-                    text: "Réglage"
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 70
-                    onClicked: stackView.push("SettingsPage.qml")
-                }
-
-                Button {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 70
-                    Layout.topMargin: Style.spacingSmall
-                    font.pixelSize: Style.fontSizeLarge
-                    font.bold: true
-                    background: Rectangle {
-                        color: Style.dangerColor
-                        radius: Style.radiusSmall
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            shadowEnabled: true
+                            shadowColor: "#80000000"
+                            shadowHorizontalOffset: 0
+                            shadowVerticalOffset: 4
+                            shadowBlur: 12
+                        }
                     }
-                    contentItem: Text {
-                        text: "Quitter"
-                        font: parent.font
-                        color: Style.textColorLight
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
+
+                    Text {
+                        id: titleText
+                        text: "LudoBot"
+                        color: Style.textColorPrimary
+                        font {
+                            family: appFont.family
+                            pixelSize: Style.fontSizeHeader
+                            weight: Font.Bold
+                        }
+                        anchors {
+                            top: logoImage.bottom
+                            topMargin: Style.spacingSmall
+                            horizontalCenter: parent.horizontalCenter
+                        }
                     }
-                    onClicked: Qt.quit()
+
+                    Text {
+                        id: subtitleText
+                        text: "Apprenez en vous amusant"
+                        color: Style.textColorSecondary
+                        font {
+                            family: appFont.family
+                            pixelSize: Style.fontSizeMedium
+                        }
+                        anchors {
+                            top: titleText.bottom
+                            topMargin: Style.spacingTiny
+                            horizontalCenter: parent.horizontalCenter
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: menuSection
+                    anchors {
+                        top: headerSection.bottom
+                        bottom: parent.bottom
+                        left: parent.left
+                        right: parent.right
+                    }
+                    color: "transparent"
+
+                    GridLayout {
+                        anchors.centerIn: parent
+                        width: Math.min(parent.width * 0.9, 600)
+                        columnSpacing: Style.spacingMedium
+                        rowSpacing: Style.spacingMedium
+                        columns: width > 500 ? 2 : 1
+
+                        Button {
+                            Layout.fillWidth: true
+                            text: "Jouer"
+                            Layout.preferredHeight: 80
+                            Material.background: Style.primaryColor
+                            Material.foreground: "white"
+                            Material.elevation: Style.elevation2
+                            onClicked: stackView.push("PlayPage.qml")
+                            
+                            contentItem: RowLayout {
+                                spacing: Style.spacingMedium
+                                Item { width: Style.spacingMedium }
+                                Image {
+                                    source: "assets/icons/play_circle.svg"
+                                    sourceSize.width: 24
+                                    sourceSize.height: 24
+                                    Layout.preferredWidth: 24
+                                    Layout.preferredHeight: 24
+                                    fillMode: Image.PreserveAspectFit
+                                }
+                                Text {
+                                    text: parent.parent.text
+                                    font {
+                                        family: appFont.family
+                                        pixelSize: Style.fontSizeLarge
+                                        weight: Font.Medium
+                                    }
+                                    color: "white"
+                                    Layout.fillWidth: true
+                                }
+                            }
+                        }
+
+
+
+                        Button {
+                            Layout.fillWidth: true
+                            text: "Réglages"
+                            Layout.preferredHeight: 80
+                            Material.background: Style.primaryColor
+                            Material.foreground: "white"
+                            Material.elevation: Style.elevation2
+                            onClicked: stackView.push("SettingsPage.qml")
+                            
+                            contentItem: RowLayout {
+                                spacing: Style.spacingMedium
+                                Item { width: Style.spacingMedium }
+                                Image {
+                                    source: "assets/icons/settings.svg"
+                                    sourceSize.width: 24
+                                    sourceSize.height: 24
+                                    Layout.preferredWidth: 24
+                                    Layout.preferredHeight: 24
+                                    fillMode: Image.PreserveAspectFit
+                                }
+                                Text {
+                                    text: parent.parent.text
+                                    font {
+                                        family: appFont.family
+                                        pixelSize: Style.fontSizeLarge
+                                        weight: Font.Medium
+                                    }
+                                    color: "white"
+                                    Layout.fillWidth: true
+                                }
+                            }
+                        }
+
+                        Button {
+                            Layout.fillWidth: true
+                            text: "Quitter"
+                            Layout.preferredHeight: 80
+                            Material.background: Style.dangerColor
+                            Material.foreground: "white"
+                            Material.elevation: Style.elevation2
+                            onClicked: Qt.quit()
+                            
+                            contentItem: RowLayout {
+                                spacing: Style.spacingMedium
+                                Item { width: Style.spacingMedium }
+                                Image {
+                                    source: "assets/icons/power.svg"
+                                    sourceSize.width: 24
+                                    sourceSize.height: 24
+                                    Layout.preferredWidth: 24
+                                    Layout.preferredHeight: 24
+                                    fillMode: Image.PreserveAspectFit
+                                }
+                                Text {
+                                    text: parent.parent.text
+                                    font {
+                                        family: appFont.family
+                                        pixelSize: Style.fontSizeLarge
+                                        weight: Font.Medium
+                                    }
+                                    color: "white"
+                                    Layout.fillWidth: true
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        }
-    }
-
-    component MainMenuButton: Button {
-        font.pixelSize: Style.fontSizeLarge
-        font.bold: true
-
-        background: Rectangle {
-            color: Style.accentColor
-            radius: Style.radiusSmall
-        }
-        
-        contentItem: Text {
-            text: parent.text
-            font: parent.font
-            color: Style.textColorDark
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
         }
     }
 }

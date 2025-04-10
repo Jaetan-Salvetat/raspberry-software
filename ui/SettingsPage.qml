@@ -1,113 +1,89 @@
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Controls.Material 2.15
+import QtQuick.Controls 2.15
 import QtQuick.Layouts
+import QtQuick.Effects
 import "."
 
-Rectangle {
+Page {
     id: settingsPage
-    color: Style.primaryColor
-
+    background: Rectangle { color: Style.backgroundColor }
     property QtObject controller: settingsController
 
-    Image {
-        id: logoImage
-        source: "assets/LudoBot.png"
-        width: 120
-        height: 120
-        anchors {
-            top: parent.top
-            topMargin: 30
-            horizontalCenter: parent.horizontalCenter
-        }
-        fillMode: Image.PreserveAspectFit
-        visible: false
-    }
+    header: ToolBar {
+        id: toolbar
+        height: 70
+        Material.background: Style.surfaceColor
+        Material.elevation: Style.elevation2
 
-    Text {
-        id: titleText
-        text: "Réglages"
-        color: Style.textColorLight
-        font {
-            pixelSize: Style.fontSizeHeader
-            bold: true
-        }
-        anchors {
-            top: parent.top
-            topMargin: Style.spacingLarge
-            horizontalCenter: parent.horizontalCenter
-        }
-    }
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: Style.spacingMedium
+            anchors.rightMargin: Style.spacingMedium
 
-    Button {
-        id: backButton
-        anchors {
-            left: parent.left
-            top: parent.top
-            margins: Style.spacingMedium
+            RoundButton {
+                id: backButton
+                icon.source: "assets/icons/arrow_back.svg"
+                icon.width: 24
+                icon.height: 24
+                flat: true
+                onClicked: stackView.pop()
+                Material.foreground: Style.textColorPrimary
+            }
+
+            Label {
+                text: "Réglages"
+                font.pixelSize: Style.fontSizeXLarge
+                font.family: appFont.family
+                font.weight: Font.Medium
+                elide: Label.ElideRight
+                horizontalAlignment: Qt.AlignHCenter
+                verticalAlignment: Qt.AlignVCenter
+                Layout.fillWidth: true
+                color: Style.textColorPrimary
+            }
+
+            Item { width: backButton.width }
         }
-        width: 50
-        height: 50
-        background: Rectangle {
-            color: "transparent"
-            border.color: Style.textColorLight
-            border.width: 2
-            radius: 25
-        }
-        contentItem: Text {
-            text: "←"
-            color: Style.textColorLight
-            font.pixelSize: 24
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-        }
-        onClicked: stackView.pop()
     }
 
     ScrollView {
         id: settingsScrollView
-        anchors {
-            top: titleText.bottom
-            topMargin: Style.spacingLarge * 2
-            left: parent.left
-            right: parent.right
-            leftMargin: Style.spacingLarge
-            rightMargin: Style.spacingLarge
-        }
+        anchors.fill: parent
+        anchors.margins: Style.spacingMedium
         clip: true
         ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
         ColumnLayout {
             id: settingsColumn
             spacing: Style.spacingMedium
-            width: settingsScrollView.width
+            width: settingsScrollView.width - Style.spacingMedium * 2
 
             SettingsCard {
                 title: "Volume"
-                iconSource: "assets/volume.svg"
+                icon: "assets/icons/volume_up.svg"
                 Layout.fillWidth: true
 
                 ColumnLayout {
-                    spacing: Style.spacingSmall
+                    spacing: Style.spacingMedium
                     Layout.fillWidth: true
-                    Layout.topMargin: Style.spacingSmall
-                    Layout.bottomMargin: Style.spacingSmall
+                    Layout.margins: Style.spacingMedium
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Style.spacingSmall
+                        spacing: Style.spacingMedium
 
-                        Text {
-                            text: "Volume principal"
-                            color: Style.textColorDark
-                            font.pixelSize: Style.fontSizeSmall
+                        Image {
+                            source: "assets/icons/volume_down.svg"
+                            sourceSize.width: 20
+                            sourceSize.height: 20
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         Slider {
                             id: volumeSlider
                             Layout.fillWidth: true
                             Layout.preferredHeight: 40
-                            implicitHeight: 40
-                            height: 40
                             from: 0
                             to: 100
                             value: controller.volume || 0
@@ -119,42 +95,24 @@ Rectangle {
                                 if (!pressed)
                                     controller.set_volume(Math.round(value))
                             }
-                            
-                            background: Rectangle {
-                                x: volumeSlider.leftPadding
-                                y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2
-                                width: volumeSlider.availableWidth
-                                height: 8
-                                radius: 4
-                                color: "#dddddd"
+                            Material.accent: Style.accentColor
+                        }
 
-                                Rectangle {
-                                    width: volumeSlider.visualPosition * parent.width
-                                    height: parent.height
-                                    color: Style.accentColor
-                                    radius: 3
-                                }
-                            }
-
-                            handle: Rectangle {
-                                x: volumeSlider.leftPadding + volumeSlider.visualPosition * (volumeSlider.availableWidth - width)
-                                y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2
-                                width: 20
-                                height: 20
-                                radius: 10
-                                color: Style.accentColor
-                                border.color: "white"
-                                border.width: 2
-                            }
+                        Image {
+                            source: "assets/icons/volume_up.svg"
+                            sourceSize.width: 20
+                            sourceSize.height: 20
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         Text {
                             id: volumeText
                             text: Math.round(volumeSlider.value || 0) + "%"
-                            color: Style.textColorDark
+                            color: Style.textColorPrimary
+                            font.family: appFont.family
                             font.pixelSize: Style.fontSizeMedium
-                            font.bold: true
-                            Layout.preferredWidth: 60
+                            font.weight: Font.Medium
+                            Layout.preferredWidth: 50
                             horizontalAlignment: Text.AlignRight
                         }
                     }
@@ -163,75 +121,53 @@ Rectangle {
 
             SettingsCard {
                 title: "Vibration"
-                iconSource: "assets/vibration.svg"
+                icon: "assets/icons/vibration.svg"
                 Layout.fillWidth: true
 
                 RowLayout {
-                    spacing: Style.spacingSmall
+                    spacing: Style.spacingMedium
                     Layout.fillWidth: true
-                    Layout.topMargin: Style.spacingSmall
-                    Layout.bottomMargin: Style.spacingSmall
+                    Layout.margins: Style.spacingMedium
 
                     Text {
                         text: "Activer les vibrations"
-                        color: Style.textColorDark
-                        font.pixelSize: Style.fontSizeSmall
+                        color: Style.textColorPrimary
+                        font.family: appFont.family
+                        font.pixelSize: Style.fontSizeMedium
                         Layout.fillWidth: true
                     }
 
                     Switch {
                         id: vibrationSwitch
                         checked: controller.vibration_enabled
-                        onCheckedChanged: controller.set_vibration_enabled(vibrationSwitch.checked)
-                        
-                        indicator: Rectangle {
-                            implicitWidth: 48
-                            implicitHeight: 26
-                            x: vibrationSwitch.leftPadding
-                            y: parent.height / 2 - height / 2
-                            radius: 13
-                            color: vibrationSwitch.checked ? Style.accentColor : "#cccccc"
-                            border.color: vibrationSwitch.checked ? Style.accentColor : "#999999"
-
-                            Rectangle {
-                                x: vibrationSwitch.checked ? parent.width - width - 2 : 2
-                                y: 2
-                                width: 22
-                                height: 22
-                                radius: 11
-                                color: "white"
-                            }
+                        onCheckedChanged: {
+                            controller.set_vibration_enabled(vibrationSwitch.checked)
                         }
+                        Material.accent: Style.accentColor
                     }
                 }
             }
 
             SettingsCard {
                 title: "Langue"
-                iconSource: "assets/language.svg"
+                icon: "assets/icons/language.svg"
                 Layout.fillWidth: true
 
                 ColumnLayout {
                     Layout.fillWidth: true
-                    Layout.topMargin: Style.spacingSmall
-                    Layout.bottomMargin: Style.spacingSmall
-                    spacing: Style.spacingSmall
-
-                    Text {
-                        text: "Sélectionnez la langue"
-                        color: Style.textColorDark
-                        font.pixelSize: Style.fontSizeSmall
-                    }
+                    Layout.margins: Style.spacingMedium
+                    spacing: Style.spacingMedium
 
                     ComboBox {
                         id: languageCombo
                         model: ["Français", "English"]
                         currentIndex: 0
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 40
+                        Layout.preferredHeight: 50
+                        font.family: appFont.family
                         font.pixelSize: Style.fontSizeMedium
                         popup.font.pixelSize: Style.fontSizeMedium
-                        
+                        Material.foreground: Style.textColorPrimary
                         onActivated: {
                             controller.set_language(currentIndex)
                         }
@@ -239,27 +175,76 @@ Rectangle {
                 }
             }
 
+            SettingsCard {
+                title: "Wi-Fi"
+                icon: "assets/icons/wifi.svg"
+                Layout.fillWidth: true
+
+                RowLayout {
+                    spacing: Style.spacingMedium
+                    Layout.fillWidth: true
+                    Layout.margins: Style.spacingMedium
+
+                    Text {
+                        text: "Configuration Wi-Fi"
+                        color: Style.textColorPrimary
+                        font.family: appFont.family
+                        font.pixelSize: Style.fontSizeMedium
+                        Layout.fillWidth: true
+                    }
+
+                    Button {
+                        text: "Configurer"
+                        font.family: appFont.family
+                        font.pixelSize: Style.fontSizeSmall
+                        Material.background: Style.accentColor
+                        Material.foreground: "white"
+                        onClicked: stackView.push("WifiPage.qml")
+                    }
+                }
+            }
+
+            SettingsCard {
+                title: "Apparence"
+                icon: "assets/icons/palette.svg"
+                Layout.fillWidth: true
+
+                RowLayout {
+                    spacing: Style.spacingMedium
+                    Layout.fillWidth: true
+                    Layout.margins: Style.spacingMedium
+
+                    Text {
+                        text: "Mode sombre"
+                        color: Style.textColorPrimary
+                        font.family: appFont.family
+                        font.pixelSize: Style.fontSizeMedium
+                        Layout.fillWidth: true
+                    }
+
+                    Switch {
+                        id: darkModeSwitch
+                        checked: Style.isDarkTheme
+                        onCheckedChanged: {
+                            Style.isDarkTheme = checked
+                        }
+                        Material.accent: Style.accentColor
+                    }
+                }
+            }
+
             Button {
                 text: "Enregistrer"
                 Layout.fillWidth: true
-
-                Layout.preferredHeight: 50
+                Layout.preferredHeight: 60
                 Layout.topMargin: Style.spacingMedium
+                Layout.bottomMargin: Style.spacingLarge
+                font.family: appFont.family
                 font.pixelSize: Style.fontSizeMedium
+                font.weight: Font.Medium
+                Material.background: Style.accentColor
+                Material.foreground: "white"
                 font.bold: true
-
-                background: Rectangle {
-                    color: Style.accentColor
-                    radius: Style.radiusMedium
-                }
-
-                contentItem: Text {
-                    text: parent.text
-                    font: parent.font
-                    color: "white"
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
 
                 onClicked: {
                     controller.save_settings()
@@ -269,62 +254,79 @@ Rectangle {
         }
     }
 
-    component SettingsCard: Rectangle {
+    component SettingsCard: Pane {
         id: settingsCard
         property string title: ""
-        property string iconSource: ""
+        property string icon: ""
         default property alias content: contentLayout.children
 
-        color: Style.cardColor
-        radius: Style.radiusMedium
-        implicitHeight: headerRow.height + contentLayout.height + 40
+        Material.background: Style.surfaceColor
+        Material.elevation: Style.elevation1
+        implicitHeight: headerRow.height + contentLayout.height + Style.spacingLarge
         Layout.fillWidth: true
+        padding: 0
+        clip: true
 
-        Rectangle {
-            anchors.fill: parent
-            radius: parent.radius
-            color: Style.shadowColor
-            opacity: 0.1
-            z: -1
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.15)
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 2
+            shadowBlur: 8
+        }
+
+        background: Rectangle {
+            color: Style.surfaceColor
+            radius: Style.radiusMedium
         }
 
         ColumnLayout {
-            anchors {
-                fill: parent
-                margins: 15
-            }
-            spacing: 5
+            anchors.fill: parent
+            spacing: 0
 
-            RowLayout {
-                id: headerRow
+            Pane {
                 Layout.fillWidth: true
-                spacing: 10
+                Layout.preferredHeight: 60
+                padding: 0
+                Material.elevation: 0
+                Material.background: "transparent"
 
-                Image {
-                    source: iconSource
-                    sourceSize.width: 24
-                    sourceSize.height: 24
-                    fillMode: Image.PreserveAspectFit
+                Rectangle {
+                    anchors.fill: parent
+                    color: Qt.rgba(Style.accentColor.r, Style.accentColor.g, Style.accentColor.b, 0.1)
+                    visible: true
                 }
 
-                Text {
-                    text: title
-                    font.pixelSize: 18
-                    font.bold: true
-                    color: "#333333"
-                }
-            }
+                RowLayout {
+                    id: headerRow
+                    anchors.fill: parent
+                    anchors.leftMargin: Style.spacingMedium
+                    anchors.rightMargin: Style.spacingMedium
+                    spacing: Style.spacingMedium
 
-            Rectangle {
-                Layout.fillWidth: true
-                height: 1
-                color: "#e0e0e0"
+                    Image {
+                        source: icon
+                        sourceSize.width: 24
+                        sourceSize.height: 24
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    Label {
+                        text: title
+                        font.family: appFont.family
+                        font.pixelSize: Style.fontSizeLarge
+                        font.weight: Font.Medium
+                        color: Style.textColorPrimary
+                        Layout.fillWidth: true
+                    }
+                }
             }
 
             ColumnLayout {
                 id: contentLayout
                 Layout.fillWidth: true
-                spacing: 10
+                spacing: Style.spacingMedium
             }
         }
     }
@@ -332,47 +334,61 @@ Rectangle {
     Popup {
         id: savePopup
         anchors.centerIn: parent
-        width: 250
-        height: 100
+        width: 300
+        height: 160
         modal: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        enter: Transition {
+            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: Style.animationDurationNormal }
+        }
+        exit: Transition {
+            NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; duration: Style.animationDurationNormal }
+        }
         
         background: Rectangle {
-            color: Style.cardColor
-            radius: Style.radiusMedium
-            border.color: Style.accentColor
-            border.width: 2
+            color: Style.surfaceColor
+            radius: Style.radiusLarge
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: Qt.rgba(0, 0, 0, 0.2)
+                shadowHorizontalOffset: 0
+                shadowVerticalOffset: 4
+                shadowBlur: 12
+            }
         }
         
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Style.spacingSmall
-            spacing: Style.spacingMedium
+            anchors.margins: Style.spacingLarge
+            spacing: Style.spacingLarge
+            
+            Image {
+                source: "assets/icons/check_circle.svg"
+                sourceSize.width: 48
+                sourceSize.height: 48
+                Layout.alignment: Qt.AlignHCenter
+            }
             
             Text {
                 text: "Paramètres sauvegardés !"
-                font.pixelSize: Style.fontSizeMedium
-                font.bold: true
-                color: Style.textColorDark
+                font.family: appFont.family
+                font.pixelSize: Style.fontSizeLarge
+                font.weight: Font.Medium
+                color: Style.textColorPrimary
                 Layout.alignment: Qt.AlignHCenter
             }
             
             Button {
                 text: "OK"
                 Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: 80
-
-                background: Rectangle {
-                    color: Style.accentColor
-                    radius: Style.radiusMedium
-                }
-                contentItem: Text {
-                    text: parent.text
-                    color: "white"
-                    font.pixelSize: Style.fontSizeSmall
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
+                Layout.preferredWidth: 120
+                Layout.preferredHeight: 40
+                Material.background: Style.accentColor
+                Material.foreground: "white"
+                font.family: appFont.family
+                font.pixelSize: Style.fontSizeMedium
+                onClicked: savePopup.close()
             }
         }
     }
