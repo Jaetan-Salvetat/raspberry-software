@@ -2,7 +2,7 @@ import subprocess
 import os
 import time
 import sys
-print("test")
+
 def connect_to_wifi(ssid, password=None):
     """
     Se connecte à un réseau WiFi sous Windows.
