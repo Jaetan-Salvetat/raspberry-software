@@ -63,3 +63,8 @@ class WifiController(QObject):
         else:
             # Appel classique (réseau ouvert ou déjà détecté)
             self._wifi_manager.connect_to_network(ssid, password)
+            
+    @Slot()
+    def disconnect_network(self):
+        """Déconnecte le réseau WiFi actuel"""
+        self._wifi_manager.disconnect_network()

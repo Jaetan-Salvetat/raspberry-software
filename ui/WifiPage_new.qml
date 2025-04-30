@@ -180,24 +180,42 @@ Page {
                 }
 
                 ColumnLayout {
+                    spacing: Style.spacingSmall
                     Layout.fillWidth: true
-                    spacing: 4
 
                     Label {
-                        text: wifiController ? wifiController.currentNetwork() : "Non connecté"
-                        font.pixelSize: Style.fontSizeMedium
-                        font.family: appFont.family
-                        font.weight: Font.Medium
-                        color: Style.textColorPrimary
-                        Layout.fillWidth: true
-                    }
-
-                    Label {
-                        text: "Connecté"
+                        text: "Réseau actuel:"
                         font.pixelSize: Style.fontSizeSmall
                         font.family: appFont.family
-                        color: Style.accentColor
+                        color: Style.textColorSecondary
+                    }
+                    
+                    RowLayout {
+                        spacing: Style.spacingMedium
                         Layout.fillWidth: true
+                        
+                        Label {
+                            id: currentNetworkLabel
+                            text: wifiController ? wifiController.currentNetwork() : "Non connecté"
+                            font.pixelSize: Style.fontSizeMedium
+                            font.weight: Font.Medium
+                            font.family: appFont.family
+                            color: Style.accentColor
+                            Layout.fillWidth: true
+                        }
+                        
+                        Button {
+                            text: "Déconnecter"
+                            font.family: appFont.family
+                            font.pixelSize: Style.fontSizeSmall
+                            visible: currentNetworkLabel.text !== "Non connecté"
+                            Material.background: Style.accentColor
+                            onClicked: {
+                                if (wifiController) {
+                                    wifiController.disconnect_network()
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -314,9 +332,9 @@ Page {
         }
     }
 
-    // Dialogue pour entrer le mot de passe
+    // Dialogue pour entrer le mot de passe (2ème version)
     Dialog {
-        id: passwordDialog
+        id: passwordDialog2
         property string networkName: ""
         title: "Se connecter à " + networkName
         modal: true
@@ -391,7 +409,7 @@ Page {
                     font.pixelSize: Style.fontSizeMedium
                     onClicked: {
                         connectPasswordField.text = ""
-                        passwordDialog.close()
+                        passwordDialog2.close()
                     }
                     Material.foreground: Style.textColorPrimary
                 }
@@ -403,7 +421,7 @@ Page {
                     Material.background: Style.accentColor
                     highlighted: true
                     onClicked: {
-                        var networkName = passwordDialog.networkName || "";
+                        var networkName = passwordDialog2.networkName || "";
                         console.log("Connecting to " + networkName + " with password " + connectPasswordField.text)
                         if (typeof wifiController !== "undefined" && wifiController) {
                             wifiController.connect_to_network(networkName, connectPasswordField.text)
@@ -411,7 +429,7 @@ Page {
                             // au lieu d'accéder directement à statusLabel
                         }
                         connectPasswordField.text = ""
-                        passwordDialog.close()
+                        passwordDialog2.close()
                     }
                 }
             }
