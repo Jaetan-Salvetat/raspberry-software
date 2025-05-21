@@ -90,8 +90,25 @@ class UpdateChecker:
     def is_newer_version(self):
         if not self.latest_version:
             return False
+        
+        # Conversion en tuples d'entiers pour comparaison correcte
+        current_parts = [int(x) for x in self.current_version.split('.')]
+        latest_parts = [int(x) for x in self.latest_version.split('.')]
+        
+        # Comparer les parties une par une
+        for i in range(max(len(current_parts), len(latest_parts))):
+            # Si la version actuelle a moins de composants que la dernière, compléter avec 0
+            current = current_parts[i] if i < len(current_parts) else 0
+            # Si la dernière version a moins de composants que l'actuelle, compléter avec 0
+            latest = latest_parts[i] if i < len(latest_parts) else 0
             
-        return self.latest_version > self.current_version
+            if latest > current:
+                return True
+            elif current > latest:
+                return False
+        
+        # Si toutes les parties sont égales
+        return False
     
     def download_update(self):
         if not self.download_url:
@@ -187,6 +204,41 @@ exit 0
         threading.Thread(target=self.check_for_updates, daemon=True).start()
         self.root.mainloop()
 
+def main():
+    # Vérifier si une mise à jour est disponible sans afficher l'interface
+    checker = UpdateChecker()
+    current_version = checker.get_current_version()
+    
+    try:
+        response = urllib.request.urlopen(GITHUB_API_URL)
+        data = json.loads(response.read().decode())
+        latest_version = data["tag_name"].replace("v", "")
+        
+        # Conversion en tuples d'entiers pour comparaison correcte
+        current_parts = [int(x) for x in current_version.split('.')]
+        latest_parts = [int(x) for x in latest_version.split('.')]
+        newer_version_available = False
+        
+        # Comparer les parties une par une
+        for i in range(max(len(current_parts), len(latest_parts))):
+            current = current_parts[i] if i < len(current_parts) else 0
+            latest = latest_parts[i] if i < len(latest_parts) else 0
+            
+            if latest > current:
+                newer_version_available = True
+                break
+            elif current > latest:
+                break
+        
+        # Ne lancer l'interface que si une mise à jour est disponible
+        if newer_version_available:
+            app = UpdateChecker()
+            app.run()
+        else:
+            print(f"Version actuelle ({current_version}) est à jour. Dernière version: {latest_version}")
+            
+    except Exception as e:
+        print(f"Erreur lors de la vérification des mises à jour: {e}")
+
 if __name__ == "__main__":
-    app = UpdateChecker()
-    app.run()
+    main()
