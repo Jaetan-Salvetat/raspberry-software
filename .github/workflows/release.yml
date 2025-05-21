@@ -25,7 +25,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install cx_Freeze PySide6
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - run: |
+          # Vérifier l'espace disque initial
+          echo "===== ESPACE DISQUE AVANT BUILD ====="
+          df -h
+          echo "================================="
       - run: python setup.py build
+      - run: |
+          # Analyser la taille des dossiers après le build
+          echo "===== TAILLE DES DOSSIERS ====="
+          du -h --max-depth=1 .
+          echo "===== CONTENU DU DOSSIER BUILD ====="
+          du -h --max-depth=1 build/
+          if [ -d build/exe* ]; then
+            echo "===== CONTENU DU DOSSIER EXE ====="
+            du -h --max-depth=1 build/exe*/
+            echo "===== FICHIERS LES PLUS VOLUMINEUX ====="
+            find build -type f -size +50M | xargs ls -lh | sort -rh | head -n 10
+          fi
       - run: |
           cat > install.sh << 'EOF'
           #!/bin/bash
@@ -63,20 +80,47 @@ jobs:
       - run: |
           mkdir -p release
           if [ -d build/exe* ]; then
-            # Copier uniquement les fichiers nécessaires
-            cp -r build/exe*/* release/
-            cp install.sh release/
+            # Créer un dossier temporaire pour une version épurée
+            mkdir -p clean_release
             
-            # Nettoyer les fichiers temporaires ou de grande taille
-            find release -name "__pycache__" -type d -exec rm -rf {} +
-            find release -name "*.pyc" -delete
-            find release -name "*.pyo" -delete
-            find release -name "*.pyd" -delete
+            # Copier seulement les fichiers essentiels
+            cp -r build/exe*/LudoBot clean_release/
+            cp -r build/exe*/lib clean_release/
+            cp -r build/exe*/ui clean_release/
+            cp -r build/exe*/quizzes clean_release/
+            cp build/exe*/version.py clean_release/
+            cp build/exe*/update_checker.py clean_release/
+            cp install.sh clean_release/
             
-            # Créer le ZIP en se plaçant dans le dossier (pour éviter le répertoire parent)
-            cd release && zip -r ../LudoBot-Linux.zip . && cd ..
+            # Supprimer uniquement les fichiers PySide6 non utilisés
+            rm -rf clean_release/lib/PySide6/Qt3D*
+            rm -rf clean_release/lib/PySide6/QtWeb*
+            rm -rf clean_release/lib/PySide6/QtMultimedia*
+            rm -rf clean_release/lib/PySide6/QtTest*
+            rm -rf clean_release/lib/PySide6/QtSql*
+            rm -rf clean_release/lib/PySide6/QtXml*
+            rm -rf clean_release/lib/PySide6/QtSvg*
+            rm -rf clean_release/lib/PySide6/examples
             
-            # Afficher la taille du ZIP pour vérification
+            # Nettoyage général
+            find clean_release -name "__pycache__" -type d -exec rm -rf {} +
+            find clean_release -name "*.pyc" -delete
+            find clean_release -name "*.pyo" -delete
+            find clean_release -name "*.pyd" -delete
+            find clean_release -name "*.so.debug" -delete
+            find clean_release -name "*.a" -delete
+            find clean_release -type f -name "*.o" -delete
+            find clean_release -type f -size +10M | xargs ls -lh
+            
+            # Afficher la taille avant compression
+            echo "===== TAILLE FINALE AVANT COMPRESSION ====="
+            du -sh clean_release
+            
+            # Compression avec un niveau optimal
+            cd clean_release && zip -9r ../LudoBot-Linux.zip . && cd ..
+            
+            # Afficher la taille du ZIP
+            echo "===== TAILLE DU FICHIER ZIP ====="
             ls -lh LudoBot-Linux.zip
           else
             echo "Build directory not found. Check if the build was successful."
