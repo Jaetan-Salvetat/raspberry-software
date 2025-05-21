@@ -217,7 +217,10 @@ rm "$DOWNLOAD_PATH"
 rm "$0"
 
 echo "Update complete. Restarting LudoBot..."
-cd "$APP_DIR" && ./run_ludobot.sh &
+cd "$APP_DIR" # ./run_ludobot.sh
+
+# Démarrer l'application Python directement
+python3 main.py &
 
 exit 0
 """
