@@ -259,7 +259,16 @@ def main():
         response = urllib.request.urlopen(req)
         print(f"Statut de la réponse API: {response.status}")
         data = json.loads(response.read().decode())
-        print(f"Données brutes de l'API:\n{json.dumps(data, indent=2)[0:500]}...")
+        
+        # Enregistrer la réponse complète dans un fichier pour débogage
+        response_file = os.path.join(TEMP_DIR, "github_api_response.json")
+        with open(response_file, "w") as f:
+            json.dump(data, f, indent=2)
+        
+        print(f"Réponse complète sauvegardée dans: {response_file}")
+        print(f"Données brutes de l'API (aperçu):\n{json.dumps(data, indent=2)[0:500]}...")
+        print("Type de données reçues:", type(data))
+        print("Clés disponibles dans la réponse:", list(data.keys()) if isinstance(data, dict) else "Pas un dictionnaire")
         latest_version = data["tag_name"].replace("v", "")
         print(f"Dernière version disponible sur GitHub: {latest_version}")
         
