@@ -55,16 +55,6 @@ jobs:
         run: |
           python -m nuitka --onefile --enable-plugin=pyside6 --include-data-dir=ui=ui --include-data-dir=quizzes=quizzes main.py
       
-      # Log build info
-      - name: Log build info
-        run: |
-          echo "===== TAILLE DES DOSSIERS ====="
-          du -h --max-depth=1 .
-          echo "===== CONTENU DU DOSSIER BUILD ====="
-          du -h --max-depth=1 build/
-          echo "===== FICHIERS LES PLUS VOLUMINEUX ====="
-          find build -type f -size +10M | xargs ls -lh | sort -rh | head -n 10
-      
       # Create installer script
       - name: Create installer script
         run: |
@@ -111,7 +101,7 @@ jobs:
           mkdir -p clean_release
           
           # Copier seulement les fichiers essentiels
-          cp -r build/main.dist/* clean_release/
+          cp -r main.dist/* clean_release/
           cp install.sh clean_release/
           
           # Nettoyage général
