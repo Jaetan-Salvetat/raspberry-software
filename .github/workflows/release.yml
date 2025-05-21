@@ -56,8 +56,7 @@ jobs:
         with:
           nuitka-version: main
           script-name: LudoBot.py
-          onefile: false
-          standalone: true
+          mode: standalone
           enable-plugins: pyside6
           include-data-dir: |
             ui=ui
