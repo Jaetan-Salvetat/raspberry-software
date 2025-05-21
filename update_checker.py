@@ -65,7 +65,10 @@ class UpdateChecker:
         self.root.update_idletasks()
         
         try:
-            response = urllib.request.urlopen(GITHUB_API_URL)
+            # Ajouter un User-Agent pour éviter les limitations de l'API GitHub
+            headers = {'User-Agent': 'LudoBot-Updater/1.0'}
+            req = urllib.request.Request(GITHUB_API_URL, headers=headers)
+            response = urllib.request.urlopen(req)
             data = json.loads(response.read().decode())
             
             self.latest_version = data["tag_name"].replace("v", "")
@@ -213,8 +216,13 @@ def main():
     
     try:
         print("Tentative de connexion à l'API GitHub...")
-        response = urllib.request.urlopen(GITHUB_API_URL)
+        # Ajouter un User-Agent pour éviter les limitations de l'API GitHub
+        headers = {'User-Agent': 'LudoBot-Updater/1.0'}
+        req = urllib.request.Request(GITHUB_API_URL, headers=headers)
+        response = urllib.request.urlopen(req)
+        print(f"Statut de la réponse API: {response.status}")
         data = json.loads(response.read().decode())
+        print(f"Données brutes de l'API:\n{json.dumps(data, indent=2)[0:500]}...")
         latest_version = data["tag_name"].replace("v", "")
         print(f"Dernière version disponible sur GitHub: {latest_version}")
         
@@ -244,12 +252,14 @@ def main():
             print(f"  Position {i}: Actuel={current} | Dernier={latest}")
             
             if latest > current:
-                print(f"  -> Version plus récente détectée à la position {i}")
+                print(f"  -> Version plus récente détectée à la position {i} ({latest} > {current})")
                 newer_version_available = True
                 break
             elif current > latest:
-                print(f"  -> Version actuelle plus récente à la position {i}")
+                print(f"  -> Version actuelle plus récente à la position {i} ({current} > {latest})")
                 break
+            else:
+                print(f"  -> Versions identiques à la position {i} ({current} = {latest})")
         
         # Afficher le résultat de la comparaison
         print(f"Résultat final: mise à jour nécessaire = {newer_version_available}")
