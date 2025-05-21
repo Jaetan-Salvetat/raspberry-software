@@ -10,9 +10,28 @@ import subprocess
 import shutil
 import threading
 from urllib.error import URLError
+from pathlib import Path
 
 REPO_OWNER = "Jaetan-Salvetat"
 REPO_NAME = "raspberry-software"
+
+# Chemin vers le fichier .env
+ENV_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+
+# Fonction pour charger le token GitHub depuis le fichier .env
+def load_github_token():
+    try:
+        if os.path.exists(ENV_FILE):
+            with open(ENV_FILE, "r") as f:
+                for line in f:
+                    if line.strip().startswith("GITHUB_TOKEN="):
+                        return line.strip().split("=", 1)[1].strip().strip('"').strip("'")
+    except Exception as e:
+        print(f"Erreur lors du chargement du token GitHub: {e}")
+    return None
+
+# Charger le token GitHub
+GITHUB_TOKEN = load_github_token()
 
 # URL spécifique pour obtenir la dernière release (conforme à la doc GitHub API)
 GITHUB_API_URL = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/releases/latest"
@@ -230,6 +249,11 @@ def main():
             'Accept': 'application/vnd.github+json',
             'X-GitHub-Api-Version': '2022-11-28'
         }
+        
+        # Ajouter le token GitHub s'il est disponible
+        if GITHUB_TOKEN:
+            print("Utilisation d'un token GitHub pour l'authentification")
+            headers['Authorization'] = f'token {GITHUB_TOKEN}'
         
         req = urllib.request.Request(GITHUB_API_URL, headers=headers)
         response = urllib.request.urlopen(req)
