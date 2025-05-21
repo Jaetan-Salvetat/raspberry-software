@@ -61,7 +61,6 @@ jobs:
             ui=ui
             quizzes=quizzes
           disable-console: false
-          macos-create-app-bundle: false
           onefile: true
       
       # Log build info
