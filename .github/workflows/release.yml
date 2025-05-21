@@ -3,109 +3,32 @@ name: Build and Release
 on:
   push:
     branches:
-      - updater
+      - main
+  workflow_dispatch: {}
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-      
-      - name: Install dependencies
-        run: |
+          python-version: '3.10'
+      - run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-glx libegl1 libxkbcommon-x11-0 libdbus-1-3 libxcb-icccm4 \
-            libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
-            libxcb-xinerama0 libxcb-shape0 libxcb-cursor0 libxcb-xkb1 libxcb-sync1 \
-            libxkbcommon-dev libxkbcommon-x11-dev
+          sudo apt-get install -y libgl1 libxcb1
           python -m pip install --upgrade pip
-          pip install cx_Freeze
-          pip install PySide6
-      
-      - name: Install project dependencies
-        run: |
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
-      
-      - name: Create setup.py for cx_Freeze
-        run: |
-          cat > setup.py << 'EOF'
-          import sys
-          from cx_Freeze import setup, Executable
-
-          build_exe_options = {
-              "packages": [
-                  "PySide6", 
-                  "PySide6.QtCore", 
-                  "PySide6.QtGui", 
-                  "PySide6.QtWidgets", 
-                  "PySide6.QtQml", 
-                  "PySide6.QtQuick"
-              ],
-              "excludes": [
-                  "tkinter", 
-                  "unittest", 
-                  "http", 
-                  "xml", 
-                  "pydoc",
-                  "PySide6.QtAsyncio",
-                  "PySide6.QtWebEngine",
-                  "PySide6.QtWebEngineCore",
-                  "PySide6.QtWebEngineWidgets"
-              ],
-              "include_files": [
-                  ("ui", "ui"),
-                  ("quizzes", "quizzes"),
-                  ("version.py", "version.py"),
-                  ("update_checker.py", "update_checker.py")
-              ],
-              "bin_includes": [
-                  "libGL.so.1"
-              ],
-              "include_msvcr": True
-          }
-
-          executables = [
-              Executable(
-                  "main.py",
-                  target_name="LudoBot",
-                  base=None,
-                  icon="ui/assets/logo.png"
-              )
-          ]
-
-          setup(
-              name="LudoBot",
-              version="0.1.0",
-              description="Application éducative avec des quiz pour enfants",
-              options={"build_exe": build_exe_options},
-              executables=executables
-          )
-          EOF
-      
-      - name: Create install script
-        run: |
+          pip install cx_Freeze PySide6
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - run: python setup.py build
+      - run: |
           cat > install.sh << 'EOF'
           #!/bin/bash
-
           SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-          
           INSTALL_DIR="$HOME/LudoBot"
           mkdir -p "$INSTALL_DIR"
-          
-          echo "Installation de LudoBot dans $INSTALL_DIR..."
-          cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR/"
-          
+          cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR"/
           chmod +x "$INSTALL_DIR/LudoBot"
-          
           mkdir -p "$HOME/.config/autostart"
           cat > "$HOME/.config/autostart/ludobot.desktop" << EOL
           [Desktop Entry]
@@ -113,10 +36,10 @@ jobs:
           Name=LudoBot
           Comment=Application éducative pour enfants
           Exec=$INSTALL_DIR/LudoBot
+          Icon=$INSTALL_DIR/ui/assets/logo.png
           Terminal=false
           Categories=Education;
           EOL
-          
           cat > "$HOME/Desktop/LudoBot.desktop" << EOL
           [Desktop Entry]
           Type=Application
@@ -127,49 +50,35 @@ jobs:
           Terminal=false
           Categories=Education;
           EOL
-          
           chmod +x "$HOME/Desktop/LudoBot.desktop"
-          
           echo "Installation terminée. LudoBot démarrera automatiquement au prochain démarrage."
           echo "Pour lancer LudoBot maintenant, exécutez $INSTALL_DIR/LudoBot"
           EOF
-          
           chmod +x install.sh
-      
-      - name: Build application
-        run: |
-          python setup.py build
-      
-      - name: Create release package
-        run: |
-          mkdir -p deployment
-          
+      - run: |
+          mkdir -p release
           if [ -d build/exe* ]; then
-            cp -r build/exe*/* deployment/
-            cp install.sh deployment/
-            cd deployment
-            zip -r ../LudoBot-Linux.zip .
-            cd ..
+            cp -r build/exe*/* release/
+            cp install.sh release/
+            zip -r LudoBot-Linux.zip release/
           else
             echo "Build directory not found. Check if the build was successful."
             exit 1
           fi
-      
-      - name: Get version
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-      
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
+      - id: get_version
+        run: |
+          VERSION=$(python -c "with open('version.py', 'r') as f: exec(f.read()); print(VERSION)")
+          echo "VERSION=v${VERSION}" >> $GITHUB_OUTPUT
+      - uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          name: Release ${{ steps.get_version.outputs.VERSION }}
           files: LudoBot-Linux.zip
-          name: LudoBot ${{ steps.get_version.outputs.VERSION }}
           body: |
             Release ${{ steps.get_version.outputs.VERSION }} de LudoBot pour Linux.
-            
             ### Installation
-            
             1. Téléchargez et décompressez le fichier `LudoBot-Linux.zip`
             2. Exécutez le script `install.sh` pour installer l'application
             3. L'application démarrera automatiquement au prochain démarrage du système
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
