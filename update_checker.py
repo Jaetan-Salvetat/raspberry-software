@@ -97,12 +97,16 @@ class UpdateChecker:
             response = urllib.request.urlopen(req)
             data = json.loads(response.read().decode())
             
-            self.latest_version = data["tag_name"].replace("v", "")
+            tag_name = data["tag_name"]
+            self.latest_version = tag_name.replace("v", "") if tag_name.startswith("v") else tag_name
             
-            for asset in data["assets"]:
-                if asset["name"].endswith(".zip"):
-                    self.download_url = asset["browser_download_url"]
-                    break
+            assets = data.get("assets", [])
+            for asset in assets:
+                asset_name = asset.get("name", "")
+                if asset_name and asset_name.endswith(".zip"):
+                    self.download_url = asset.get("browser_download_url")
+                    if self.download_url:
+                        break
             
             if self.is_newer_version():
                 self.status_label.config(text=f"Nouvelle version disponible: {self.latest_version}")
@@ -266,18 +270,38 @@ def main():
             json.dump(data, f, indent=2)
         
         print(f"Réponse complète sauvegardée dans: {response_file}")
-        print(f"Données brutes de l'API (aperçu):\n{json.dumps(data, indent=2)[0:500]}...")
+        print(f"Données brutes de l'API (aperçu):\n{json.dumps(data, indent=2)}")
         print("Type de données reçues:", type(data))
-        print("Clés disponibles dans la réponse:", list(data.keys()) if isinstance(data, dict) else "Pas un dictionnaire")
-        latest_version = data["tag_name"].replace("v", "")
+        
+        # Vérification de la présence des champs requis selon le schéma API
+        required_fields = ["tag_name", "assets", "name", "html_url"]
+        missing_fields = [field for field in required_fields if field not in data]
+        
+        if missing_fields:
+            print(f"ATTENTION: Champs manquants dans la réponse API: {missing_fields}")
+            print("Clés disponibles:", list(data.keys()) if isinstance(data, dict) else "Pas un dictionnaire")
+            raise ValueError(f"Données incomplètes de l'API GitHub. Champs manquants: {missing_fields}")
+        
+        # Extraction de la version
+        tag_name = data["tag_name"]
+        print(f"Tag de la dernière version: {tag_name}")
+        latest_version = tag_name.replace("v", "") if tag_name.startswith("v") else tag_name
         print(f"Dernière version disponible sur GitHub: {latest_version}")
         
         # Vérification des assets (fichiers de la release)
+        assets = data.get("assets", [])
+        print(f"Nombre d'assets trouvés: {len(assets)}")
+        
         asset_found = False
-        for asset in data["assets"]:
-            if asset["name"].endswith(".zip"):
-                print(f"Fichier de mise à jour trouvé: {asset['name']}")
-                print(f"URL de téléchargement: {asset['browser_download_url']}")
+        for asset in assets:
+            asset_name = asset.get("name", "")
+            download_url = asset.get("browser_download_url", "")
+            
+            if asset_name.endswith(".zip"):
+                print(f"Fichier de mise à jour trouvé: {asset_name}")
+                print(f"URL de téléchargement: {download_url}")
+                print(f"Taille du fichier: {asset.get('size', 0)} octets")
+                print(f"État de l'asset: {asset.get('state', 'inconnu')}")
                 asset_found = True
                 
         if not asset_found:
