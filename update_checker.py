@@ -205,40 +205,67 @@ exit 0
         self.root.mainloop()
 
 def main():
+    print("=== DÉMARRAGE VÉRIFICATEUR DE MISE À JOUR ===")
     # Vérifier si une mise à jour est disponible sans afficher l'interface
     checker = UpdateChecker()
     current_version = checker.get_current_version()
+    print(f"Version actuelle détectée: {current_version}")
     
     try:
+        print("Tentative de connexion à l'API GitHub...")
         response = urllib.request.urlopen(GITHUB_API_URL)
         data = json.loads(response.read().decode())
         latest_version = data["tag_name"].replace("v", "")
+        print(f"Dernière version disponible sur GitHub: {latest_version}")
+        
+        # Vérification des assets (fichiers de la release)
+        asset_found = False
+        for asset in data["assets"]:
+            if asset["name"].endswith(".zip"):
+                print(f"Fichier de mise à jour trouvé: {asset['name']}")
+                print(f"URL de téléchargement: {asset['browser_download_url']}")
+                asset_found = True
+                
+        if not asset_found:
+            print("ATTENTION: Aucun fichier ZIP trouvé dans la release!")
         
         # Conversion en tuples d'entiers pour comparaison correcte
         current_parts = [int(x) for x in current_version.split('.')]
         latest_parts = [int(x) for x in latest_version.split('.')]
+        print(f"Décomposition version actuelle: {current_parts}")
+        print(f"Décomposition dernière version: {latest_parts}")
         newer_version_available = False
         
         # Comparer les parties une par une
+        print("Comparaison des versions:")
         for i in range(max(len(current_parts), len(latest_parts))):
             current = current_parts[i] if i < len(current_parts) else 0
             latest = latest_parts[i] if i < len(latest_parts) else 0
+            print(f"  Position {i}: Actuel={current} | Dernier={latest}")
             
             if latest > current:
+                print(f"  -> Version plus récente détectée à la position {i}")
                 newer_version_available = True
                 break
             elif current > latest:
+                print(f"  -> Version actuelle plus récente à la position {i}")
                 break
+        
+        # Afficher le résultat de la comparaison
+        print(f"Résultat final: mise à jour nécessaire = {newer_version_available}")
         
         # Ne lancer l'interface que si une mise à jour est disponible
         if newer_version_available:
+            print("Lancement de l'interface de mise à jour...")
             app = UpdateChecker()
             app.run()
         else:
-            print(f"Version actuelle ({current_version}) est à jour. Dernière version: {latest_version}")
+            print(f"Aucune mise à jour nécessaire. Fermeture du vérificateur.")
             
     except Exception as e:
-        print(f"Erreur lors de la vérification des mises à jour: {e}")
+        print(f"ERREUR: Échec de la vérification des mises à jour: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main()
