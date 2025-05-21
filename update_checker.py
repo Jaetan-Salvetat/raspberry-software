@@ -13,6 +13,8 @@ from urllib.error import URLError
 
 REPO_OWNER = "Jaetan-Salvetat"
 REPO_NAME = "raspberry-software"
+
+# URL spécifique pour obtenir la dernière release (conforme à la doc GitHub API)
 GITHUB_API_URL = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/releases/latest"
 VERSION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.py")
 TEMP_DIR = tempfile.gettempdir()
@@ -65,8 +67,13 @@ class UpdateChecker:
         self.root.update_idletasks()
         
         try:
-            # Ajouter un User-Agent pour éviter les limitations de l'API GitHub
-            headers = {'User-Agent': 'LudoBot-Updater/1.0'}
+            # Créer une requête avec les en-têtes appropriés pour l'API GitHub
+            headers = {
+                'User-Agent': 'LudoBot-Updater/1.0',
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+            
             req = urllib.request.Request(GITHUB_API_URL, headers=headers)
             response = urllib.request.urlopen(req)
             data = json.loads(response.read().decode())
@@ -216,8 +223,14 @@ def main():
     
     try:
         print("Tentative de connexion à l'API GitHub...")
-        # Ajouter un User-Agent pour éviter les limitations de l'API GitHub
-        headers = {'User-Agent': 'LudoBot-Updater/1.0'}
+        
+        # Créer une requête avec les en-têtes appropriés pour l'API GitHub
+        headers = {
+            'User-Agent': 'LudoBot-Updater/1.0',
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28'
+        }
+        
         req = urllib.request.Request(GITHUB_API_URL, headers=headers)
         response = urllib.request.urlopen(req)
         print(f"Statut de la réponse API: {response.status}")
