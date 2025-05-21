@@ -1,0 +1,146 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - updater
+
+permissions:
+  contents: write
+  packages: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          architecture: 'x64'
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirements*.txt
+      
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1 libxcb1 
+          python -m pip install --upgrade pip
+          pip install PySide6 ordered-set nuitka
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      
+      # Check disk space before build
+      - name: Check disk space before build
+        run: |
+          echo "===== ESPACE DISQUE AVANT BUILD ====="
+          df -h
+          echo "=================================="
+      
+      # Build with Nuitka
+      - name: Build with Nuitka
+        run: |
+          python -m nuitka --standalone --enable-plugin=pyside6 --include-data-dir=quizzes=quizzes main.py
+      
+      # Create installer script
+      - name: Create installer script
+        run: |
+          cat > install.sh << 'EOF'
+          #!/bin/bash
+          SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+          INSTALL_DIR="$HOME/LudoBot"
+          mkdir -p "$INSTALL_DIR"
+          cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR"/
+          chmod +x "$INSTALL_DIR/main.bin"
+          mkdir -p "$HOME/.config/autostart"
+          cat > "$HOME/.config/autostart/ludobot.desktop" << EOL
+          [Desktop Entry]
+          Type=Application
+          Name=LudoBot
+          Comment=Application éducative pour enfants
+          Exec=$INSTALL_DIR/main.bin
+          Icon=$INSTALL_DIR/ui/assets/logo.png
+          Terminal=false
+          Categories=Education;
+          EOL
+          cat > "$HOME/Desktop/LudoBot.desktop" << EOL
+          [Desktop Entry]
+          Type=Application
+          Name=LudoBot
+          Comment=Application éducative pour enfants
+          Exec=$INSTALL_DIR/main.bin
+          Icon=$INSTALL_DIR/ui/assets/logo.png
+          Terminal=false
+          Categories=Education;
+          EOL
+          chmod +x "$HOME/Desktop/LudoBot.desktop"
+          echo "Installation terminée. LudoBot démarrera automatiquement au prochain démarrage."
+          echo "Pour lancer LudoBot maintenant, exécutez $INSTALL_DIR/main.bin"
+          EOF
+          chmod +x install.sh
+      
+      # Package release
+      - name: Package release
+        run: |
+          mkdir -p release
+          
+          # Créer un dossier temporaire pour une version épurée
+          mkdir -p clean_release
+          
+          # Copier seulement les fichiers essentiels
+          cp -r main.dist/* clean_release/
+          cp install.sh clean_release/
+          
+          # Nettoyage général
+          find clean_release -name "__pycache__" -type d -exec rm -rf {} +
+          find clean_release -name "*.pyc" -delete
+          find clean_release -name "*.pyo" -delete
+          find clean_release -name "*.so.debug" -delete
+          find clean_release -name "*.a" -delete
+          find clean_release -type f -name "*.o" -delete
+          
+          # Afficher la taille avant compression
+          echo "===== TAILLE FINALE AVANT COMPRESSION ====="
+          du -sh clean_release
+          
+          # Compression avec un niveau optimal
+          cd clean_release && zip -9r ../LudoBot-Linux.zip . && cd ..
+          
+          # Afficher la taille du ZIP
+          echo "===== TAILLE DU FICHIER ZIP ====="
+          ls -lh LudoBot-Linux.zip
+      
+      # Get version
+      - id: get_version
+        run: |
+          VERSION=$(python -c "with open('version.py', 'r') as f: exec(f.read()); print(VERSION)")
+          echo "VERSION=v${VERSION}" >> $GITHUB_OUTPUT
+      
+      # Create GitHub release
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          files: LudoBot-Linux.zip
+          body: |
+            Release ${{ steps.get_version.outputs.VERSION }} de LudoBot pour Linux.
+            ### Installation
+            1. Téléchargez et décompressez le fichier `LudoBot-Linux.zip`
+            2. Exécutez le script `install.sh` pour installer l'application
+            3. L'application démarrera automatiquement au prochain démarrage du système
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

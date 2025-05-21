@@ -1,6 +1,7 @@
 import sys
 import os
 import csv
+import subprocess
 from pathlib import Path
 from PySide6.QtCore import QObject, Slot, QUrl, Property, Signal
 from PySide6.QtGui import QGuiApplication, QIcon
@@ -144,7 +145,20 @@ class CSVReaderSingleton(QObject):
             print(f"Erreur lors du chargement des questions: {e}")
             return []
 
+def check_for_updates():
+    update_checker_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "update_checker.py")
+    try:
+        subprocess.Popen([sys.executable, update_checker_path], start_new_session=True)
+        # Attendre un court instant pour permettre au checker de démarrer
+        import time
+        time.sleep(1)
+    except Exception as e:
+        print(f"Erreur lors de la vérification des mises à jour: {e}")
+
 def main():
+    # Vérifier les mises à jour avant de lancer l'application
+    check_for_updates()
+    
     app = QGuiApplication(sys.argv)
     
     # Set application name and organization
