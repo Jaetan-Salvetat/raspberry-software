@@ -63,9 +63,21 @@ jobs:
       - run: |
           mkdir -p release
           if [ -d build/exe* ]; then
+            # Copier uniquement les fichiers nécessaires
             cp -r build/exe*/* release/
             cp install.sh release/
-            zip -r LudoBot-Linux.zip release/
+            
+            # Nettoyer les fichiers temporaires ou de grande taille
+            find release -name "__pycache__" -type d -exec rm -rf {} +
+            find release -name "*.pyc" -delete
+            find release -name "*.pyo" -delete
+            find release -name "*.pyd" -delete
+            
+            # Créer le ZIP en se plaçant dans le dossier (pour éviter le répertoire parent)
+            cd release && zip -r ../LudoBot-Linux.zip . && cd ..
+            
+            # Afficher la taille du ZIP pour vérification
+            ls -lh LudoBot-Linux.zip
           else
             echo "Build directory not found. Check if the build was successful."
             exit 1
