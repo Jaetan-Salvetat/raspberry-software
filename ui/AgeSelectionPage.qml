@@ -14,6 +14,20 @@ Page {
     Rectangle {
         anchors.fill: parent
         color: Style.backgroundColor
+        
+        // Logo en tant qu'image de fond avec transparence
+        Image {
+            id: backgroundLogo
+            source: "assets/LudoBot.png"
+            width: parent.width * 1.5
+            height: width
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: parent.height * 0.7 // Position plus basse sur l'écran
+            opacity: 0.07 // Très léger pour ne pas gêner la lecture
+            fillMode: Image.PreserveAspectFit
+            z: 0 // S'assurer qu'il reste en arrière-plan
+        }
 
         Item {
             id: headerSection
@@ -24,10 +38,18 @@ Page {
             Image {
                 id: logoImage
                 source: "assets/LudoBot.png"
-                width: 200
-                height: 200
+                width: 300
+                height: 300
                 anchors.centerIn: parent
                 fillMode: Image.PreserveAspectFit
+                
+                // Animation subtile de pulsation
+                SequentialAnimation on scale {
+                    running: true
+                    loops: Animation.Infinite
+                    NumberAnimation { from: 1.0; to: 1.05; duration: 2000; easing.type: Easing.InOutQuad }
+                    NumberAnimation { from: 1.05; to: 1.0; duration: 2000; easing.type: Easing.InOutQuad }
+                }
 
                 layer.enabled: true
                 layer.effect: MultiEffect {
@@ -35,7 +57,9 @@ Page {
                     shadowColor: "#80000000"
                     shadowHorizontalOffset: 0
                     shadowVerticalOffset: 4
-                    shadowBlur: 12
+                    shadowBlur: 15
+                    colorization: 0.1
+                    colorizationColor: Style.accentColor
                 }
             }
 

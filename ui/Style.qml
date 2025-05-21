@@ -2,13 +2,14 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    readonly property color primaryColor: "#2979FF"
-    readonly property color primaryVariantColor: "#2d6d9e"
-    readonly property color accentColor: "#00E5FF"
-    readonly property color textColorTertiary: "#B0BEC5"
-    readonly property color accentVariantColor: "#5ed4f4"
-    readonly property color backgroundLight: "#FAFAFA"
-    readonly property color backgroundDark: "#121212"
+    readonly property color primaryColor: "#4CAF50"          // Vert du dinosaure/dragon
+    readonly property color primaryVariantColor: "#388E3C" // Variante plus foncée du vert
+    readonly property color accentColor: "#F57C00"          // Orange du bouton JOUER et du titre LudoBot
+    readonly property color textColorTertiary: "#B0BEC5"   // Gris clair pour le texte tertiaire
+    readonly property color accentVariantColor: "#FFB74D"  // Orange plus clair pour les variantes
+    readonly property color goldColor: "#E6C068"           // Couleur dorée/beige du texte ASTRO TOYS
+    readonly property color backgroundLight: "#FFF8EE" // Beige très clair comme sur l'image
+    readonly property color backgroundDark: "#21201E" // Version sombre du beige
     readonly property color surfaceLight: "#FFFFFF"
     readonly property color surfaceDark: "#1E1E1E"
     readonly property color cardLight: "#FFFFFF"

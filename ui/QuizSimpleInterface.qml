@@ -6,7 +6,23 @@ import "."
 
 Page {
     id: quizSimpleInterface
-    background: Rectangle { color: "#F5F5F5" }
+    background: Rectangle { 
+        color: Style.backgroundColor 
+        
+        // Logo en tant qu'image de fond avec transparence
+        Image {
+            id: backgroundLogo
+            source: "assets/LudoBot.png"
+            width: parent.width * 1.5
+            height: width
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: parent.height * 0.7 // Position plus basse sur l'écran
+            opacity: 0.05 // Légèrement plus transparent pour le quiz afin de ne pas distraire
+            fillMode: Image.PreserveAspectFit
+            z: 0 // S'assurer qu'il reste en arrière-plan
+        }
+    }
     
     // Propriétés pour les paramètres du quiz
     property string questionSubject: "maths"
@@ -30,10 +46,10 @@ Page {
     
     // Couleurs pour les boutons de réponse
     property var buttonColors: [
-        "#2979FF", // Bleu
-        "#FFC107", // Jaune/Orange
-        "#9C27B0", // Violet
-        "#FF5722"  // Orange
+        "#4CAF50", // Vert du dragon/dinosaure
+        "#F57C00", // Orange du bouton JOUER
+        "#388E3C", // Variante plus foncée du vert
+        "#FFB74D"  // Orange plus clair/beige
     ]
     
     // Charger les questions depuis le CSV

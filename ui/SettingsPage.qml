@@ -117,6 +117,83 @@ Page {
                     }
                 }
             }
+            
+            SettingsCard {
+                title: "Luminosité"
+                icon: "assets/icons/brightness_medium.svg"
+                Layout.fillWidth: true
+
+                ColumnLayout {
+                    spacing: Style.spacingMedium
+                    Layout.fillWidth: true
+                    Layout.margins: Style.spacingMedium
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Style.spacingMedium
+
+                        Image {
+                            source: "assets/icons/brightness_low.svg"
+                            sourceSize.width: 20
+                            sourceSize.height: 20
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+
+                        Slider {
+                            id: brightnessSlider
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 40
+                            from: 0
+                            to: 1.0
+                            value: brightnessController ? brightnessController.brightness : 0.5
+                            live: true
+                            snapMode: Slider.SnapAlways
+                            stepSize: 0.01
+                            
+                            // Mettre à jour le texte quand le curseur change
+                            onValueChanged: {
+                                brightnessText.text = Math.round(value * 100) + "%"
+                            }
+                            
+                            // Appliquer la valeur uniquement quand l'utilisateur relâche le curseur
+                            onPressedChanged: {
+                                if (!pressed && brightnessController) {
+                                    brightnessController.set_brightness(value)
+                                }
+                            }
+                            
+                            Material.accent: Style.accentColor
+                            
+                            // Se conncecter une seule fois au début pour initialiser
+                            Component.onCompleted: {
+                                if (brightnessController) {
+                                    // Initialiser le curseur avec la valeur actuelle du système
+                                    value = brightnessController.brightness
+                                    brightnessText.text = Math.round(value * 100) + "%"
+                                }
+                            }
+                        }
+
+                        Image {
+                            source: "assets/icons/brightness_high.svg"
+                            sourceSize.width: 20
+                            sourceSize.height: 20
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+
+                        Text {
+                            id: brightnessText
+                            text: Math.round(brightnessSlider.value || 0) + "%"
+                            color: Style.textColorPrimary
+                            font.family: appFont.family
+                            font.pixelSize: Style.fontSizeMedium
+                            font.weight: Font.Medium
+                            Layout.preferredWidth: 50
+                            horizontalAlignment: Text.AlignRight
+                        }
+                    }
+                }
+            }
 
             SettingsCard {
                 title: "Vibration"

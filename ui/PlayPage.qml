@@ -7,7 +7,23 @@ import "."
 
 Page {
     id: playPage3
-    background: Rectangle { color: Style.backgroundColor }
+    background: Rectangle { 
+        color: Style.backgroundColor 
+        
+        // Logo en tant qu'image de fond avec transparence
+        Image {
+            id: backgroundLogo
+            source: "assets/LudoBot.png"
+            width: parent.width * 1.5
+            height: width
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: parent.height * 0.7 // Position plus basse sur l'écran
+            opacity: 0.07 // Très léger pour ne pas gêner la lecture
+            fillMode: Image.PreserveAspectFit
+            z: 0 // S'assurer qu'il reste en arrière-plan
+        }
+    }
 
     property QtObject quizController
     // L'âge peut être passé en paramètre
@@ -20,82 +36,82 @@ Page {
         // Retourne les matières adaptées à l'âge de l'enfant selon la liste fournie
         if (age === 3) {
             return [
-                {name: "Couleurs", icon: "🎨", color: "#2979FF", iconBg: "#BBDEFB", page: "CouleursQuizPage.qml"},
-                {name: "Formes", icon: "⬛", color: "#F50057", iconBg: "#F8BBD0", page: "FormesQuizPage.qml"},
-                {name: "Animaux", icon: "🐘", color: "#00BFA5", iconBg: "#B2DFDB", page: "AnimauxQuizPage.qml"},
-                {name: "Corps humain", icon: "👋", color: "#FFC107", iconBg: "#FFECB3", page: "CorpsHumainQuizPage.qml"},
-                {name: "Sons", icon: "🔊", color: "#673AB7", iconBg: "#D1C4E9", page: "SonsQuizPage.qml"},
-                {name: "Objets", icon: "🎁", color: "#FF5722", iconBg: "#FFCCBC", page: "ObjetsQuizPage.qml"},
-                {name: "Émotions", icon: "😊", color: "#4CAF50", iconBg: "#C8E6C9", page: "EmotionsQuizPage.qml"}
+                {name: "Couleurs", icon: "🎨", color: "#4CAF50", iconBg: "#E8F5E9", page: "CouleursQuizPage.qml"},
+                {name: "Formes", icon: "⬛", color: "#F57C00", iconBg: "#FFF3E0", page: "FormesQuizPage.qml"},
+                {name: "Animaux", icon: "🐘", color: "#388E3C", iconBg: "#E8F5E9", page: "AnimauxQuizPage.qml"},
+                {name: "Corps humain", icon: "👋", color: "#FFB74D", iconBg: "#FFF8E1", page: "CorpsHumainQuizPage.qml"},
+                {name: "Sons", icon: "🔊", color: "#4CAF50", iconBg: "#E8F5E9", page: "SonsQuizPage.qml"},
+                {name: "Objets", icon: "🎁", color: "#F57C00", iconBg: "#FFF3E0", page: "ObjetsQuizPage.qml"},
+                {name: "Émotions", icon: "😊", color: "#388E3C", iconBg: "#E8F5E9", page: "EmotionsQuizPage.qml"}
             ];
         } else if (age === 4) {
             return [
-                {name: "Comparaison", icon: "📏", color: "#2979FF", iconBg: "#BBDEFB", page: "MathsQuizPage.qml"},
-                {name: "Habitats", icon: "🏠", color: "#F50057", iconBg: "#F8BBD0", page: "CultureQuizPage.qml"},
-                {name: "Alimentation", icon: "🍎", color: "#00BFA5", iconBg: "#B2DFDB", page: "ScienceQuizPage.qml"},
-                {name: "Chiffres", icon: "123", color: "#FFC107", iconBg: "#FFECB3", page: "HistoireQuizPage.qml"},
-                {name: "Formes", icon: "⭐", color: "#673AB7", iconBg: "#D1C4E9", page: "GeographieQuizPage.qml"},
-                {name: "Vocabulaire", icon: "📝", color: "#FF5722", iconBg: "#FFCCBC", page: "MathsQuizPage.qml"},
-                {name: "Objets utiles", icon: "🔨", color: "#4CAF50", iconBg: "#C8E6C9", page: "CultureQuizPage.qml"}
+                {name: "Comparaison", icon: "📏", color: "#2E86C1", iconBg: "#D6EAF8", page: "MathsQuizPage.qml"},
+                {name: "Habitats", icon: "🏠", color: "#1A5276", iconBg: "#AED6F1", page: "CultureQuizPage.qml"},
+                {name: "Alimentation", icon: "🍎", color: "#58D68D", iconBg: "#D5F5E3", page: "ScienceQuizPage.qml"},
+                {name: "Chiffres", icon: "123", color: "#82E0AA", iconBg: "#E8F8F5", page: "HistoireQuizPage.qml"},
+                {name: "Formes", icon: "⭐", color: "#3498DB", iconBg: "#EBF5FB", page: "GeographieQuizPage.qml"},
+                {name: "Vocabulaire", icon: "📝", color: "#27AE60", iconBg: "#D4EFDF", page: "MathsQuizPage.qml"},
+                {name: "Objets utiles", icon: "🔨", color: "#1ABC9C", iconBg: "#E8F6F3", page: "CultureQuizPage.qml"}
             ];
         } else if (age === 5) {
             return [
-                {name: "Alphabet", icon: "ABC", color: "#2979FF", iconBg: "#BBDEFB", page: "MathsQuizPage.qml"},
-                {name: "Sons initiaux", icon: "🔈", color: "#F50057", iconBg: "#F8BBD0", page: "CultureQuizPage.qml"},
-                {name: "Numération", icon: "123", color: "#00BFA5", iconBg: "#B2DFDB", page: "ScienceQuizPage.qml"},
-                {name: "Contraires", icon: "⚖️", color: "#FFC107", iconBg: "#FFECB3", page: "HistoireQuizPage.qml"},
-                {name: "Temps", icon: "📅", color: "#673AB7", iconBg: "#D1C4E9", page: "GeographieQuizPage.qml"},
-                {name: "Routines", icon: "🧹", color: "#FF5722", iconBg: "#FFCCBC", page: "MathsQuizPage.qml"},
-                {name: "Émotions", icon: "❤️", color: "#4CAF50", iconBg: "#C8E6C9", page: "CultureQuizPage.qml"}
+                {name: "Alphabet", icon: "ABC", color: "#2E86C1", iconBg: "#D6EAF8", page: "MathsQuizPage.qml"},
+                {name: "Sons initiaux", icon: "🔈", color: "#1A5276", iconBg: "#AED6F1", page: "CultureQuizPage.qml"},
+                {name: "Numération", icon: "123", color: "#58D68D", iconBg: "#D5F5E3", page: "ScienceQuizPage.qml"},
+                {name: "Contraires", icon: "⚖️", color: "#82E0AA", iconBg: "#E8F8F5", page: "HistoireQuizPage.qml"},
+                {name: "Temps", icon: "📅", color: "#3498DB", iconBg: "#EBF5FB", page: "GeographieQuizPage.qml"},
+                {name: "Routines", icon: "🧹", color: "#27AE60", iconBg: "#D4EFDF", page: "MathsQuizPage.qml"},
+                {name: "Émotions", icon: "❤️", color: "#1ABC9C", iconBg: "#E8F6F3", page: "CultureQuizPage.qml"}
             ];
         } else if (age === 6) {
             return [
-                {name: "Lecture", icon: "📖", color: "#2979FF", iconBg: "#BBDEFB", page: "MathsQuizPage.qml"},
-                {name: "Calculs simples", icon: "123", color: "#F50057", iconBg: "#F8BBD0", page: "CultureQuizPage.qml"},
-                {name: "Classement", icon: "🔢", color: "#00BFA5", iconBg: "#B2DFDB", page: "ScienceQuizPage.qml"},
-                {name: "Temps", icon: "⏰", color: "#FFC107", iconBg: "#FFECB3", page: "HistoireQuizPage.qml"},
-                {name: "École", icon: "🏫", color: "#673AB7", iconBg: "#D1C4E9", page: "GeographieQuizPage.qml"},
-                {name: "Formes complexes", icon: "📐", color: "#FF5722", iconBg: "#FFCCBC", page: "MathsQuizPage.qml"},
-                {name: "Nature", icon: "🌿", color: "#4CAF50", iconBg: "#C8E6C9", page: "CultureQuizPage.qml"}
+                {name: "Lecture", icon: "📖", color: "#2E86C1", iconBg: "#D6EAF8", page: "MathsQuizPage.qml"},
+                {name: "Calculs simples", icon: "123", color: "#1A5276", iconBg: "#AED6F1", page: "CultureQuizPage.qml"},
+                {name: "Classement", icon: "🔢", color: "#58D68D", iconBg: "#D5F5E3", page: "ScienceQuizPage.qml"},
+                {name: "Temps", icon: "⏰", color: "#82E0AA", iconBg: "#E8F8F5", page: "HistoireQuizPage.qml"},
+                {name: "École", icon: "🏫", color: "#3498DB", iconBg: "#EBF5FB", page: "GeographieQuizPage.qml"},
+                {name: "Formes complexes", icon: "📐", color: "#27AE60", iconBg: "#D4EFDF", page: "MathsQuizPage.qml"},
+                {name: "Nature", icon: "🌿", color: "#1ABC9C", iconBg: "#E8F6F3", page: "CultureQuizPage.qml"}
             ];
         } else if (age === 7) {
             return [
-                {name: "Compréhension", icon: "📝", color: "#2979FF", iconBg: "#BBDEFB", page: "MathsQuizPage.qml"},
-                {name: "Problèmes", icon: "🧩", color: "#F50057", iconBg: "#F8BBD0", page: "CultureQuizPage.qml"},
-                {name: "Suites", icon: "🔄", color: "#00BFA5", iconBg: "#B2DFDB", page: "ScienceQuizPage.qml"},
-                {name: "Émotions", icon: "😊", color: "#FFC107", iconBg: "#FFECB3", page: "HistoireQuizPage.qml"},
-                {name: "Géographie simple", icon: "🗺️", color: "#673AB7", iconBg: "#D1C4E9", page: "GeographieQuizPage.qml"},
-                {name: "Mois/saisons", icon: "🍂", color: "#FF5722", iconBg: "#FFCCBC", page: "MathsQuizPage.qml"},
-                {name: "Classification", icon: "📋", color: "#4CAF50", iconBg: "#C8E6C9", page: "CultureQuizPage.qml"}
+                {name: "Compréhension", icon: "📝", color: "#2E86C1", iconBg: "#D6EAF8", page: "MathsQuizPage.qml"},
+                {name: "Problèmes", icon: "🧩", color: "#1A5276", iconBg: "#AED6F1", page: "CultureQuizPage.qml"},
+                {name: "Suites", icon: "🔄", color: "#58D68D", iconBg: "#D5F5E3", page: "ScienceQuizPage.qml"},
+                {name: "Émotions", icon: "😊", color: "#82E0AA", iconBg: "#E8F8F5", page: "HistoireQuizPage.qml"},
+                {name: "Géographie simple", icon: "🗺️", color: "#3498DB", iconBg: "#EBF5FB", page: "GeographieQuizPage.qml"},
+                {name: "Mois/saisons", icon: "🍂", color: "#27AE60", iconBg: "#D4EFDF", page: "MathsQuizPage.qml"},
+                {name: "Classification", icon: "📋", color: "#1ABC9C", iconBg: "#E8F6F3", page: "CultureQuizPage.qml"}
             ];
         } else if (age === 8) {
             return [
-                {name: "Lecture", icon: "📚", color: "#2979FF", iconBg: "#BBDEFB", page: "MathsQuizPage.qml"},
-                {name: "Multiplications", icon: "✖️", color: "#F50057", iconBg: "#F8BBD0", page: "CultureQuizPage.qml"},
-                {name: "Tri", icon: "📊", color: "#00BFA5", iconBg: "#B2DFDB", page: "ScienceQuizPage.qml"},
-                {name: "Pays francophones", icon: "🇫🇷", color: "#FFC107", iconBg: "#FFECB3", page: "HistoireQuizPage.qml"},
-                {name: "Écologie", icon: "♻️", color: "#673AB7", iconBg: "#D1C4E9", page: "GeographieQuizPage.qml"},
-                {name: "Sciences", icon: "🌱", color: "#FF5722", iconBg: "#FFCCBC", page: "MathsQuizPage.qml"},
-                {name: "Météo", icon: "🌤️", color: "#4CAF50", iconBg: "#C8E6C9", page: "CultureQuizPage.qml"}
+                {name: "Lecture", icon: "📚", color: "#2E86C1", iconBg: "#D6EAF8", page: "MathsQuizPage.qml"},
+                {name: "Multiplications", icon: "✖️", color: "#1A5276", iconBg: "#AED6F1", page: "CultureQuizPage.qml"},
+                {name: "Tri", icon: "📊", color: "#58D68D", iconBg: "#D5F5E3", page: "ScienceQuizPage.qml"},
+                {name: "Pays francophones", icon: "🇫🇷", color: "#82E0AA", iconBg: "#E8F8F5", page: "HistoireQuizPage.qml"},
+                {name: "Écologie", icon: "♻️", color: "#3498DB", iconBg: "#EBF5FB", page: "GeographieQuizPage.qml"},
+                {name: "Sciences", icon: "🌱", color: "#27AE60", iconBg: "#D4EFDF", page: "MathsQuizPage.qml"},
+                {name: "Météo", icon: "🌤️", color: "#1ABC9C", iconBg: "#E8F6F3", page: "CultureQuizPage.qml"}
             ];
         } else if (age === 9) {
             return [
-                {name: "Problèmes complexes", icon: "🧮", color: "#2979FF", iconBg: "#BBDEFB", page: "MathsQuizPage.qml"},
-                {name: "Lecture + questions", icon: "🔍", color: "#F50057", iconBg: "#F8BBD0", page: "CultureQuizPage.qml"},
-                {name: "Grammaire", icon: "🔤", color: "#00BFA5", iconBg: "#B2DFDB", page: "ScienceQuizPage.qml"},
-                {name: "Histoire simple", icon: "⏳", color: "#FFC107", iconBg: "#FFECB3", page: "HistoireQuizPage.qml"},
-                {name: "Géographie", icon: "🌍", color: "#673AB7", iconBg: "#D1C4E9", page: "GeographieQuizPage.qml"},
-                {name: "Écologie", icon: "🌎", color: "#FF5722", iconBg: "#FFCCBC", page: "MathsQuizPage.qml"},
-                {name: "Logique", icon: "💡", color: "#4CAF50", iconBg: "#C8E6C9", page: "CultureQuizPage.qml"}
+                {name: "Problèmes complexes", icon: "🧩", color: "#2E86C1", iconBg: "#D6EAF8", page: "MathsQuizPage.qml"},
+                {name: "Lecture + questions", icon: "🔍", color: "#1A5276", iconBg: "#AED6F1", page: "CultureQuizPage.qml"},
+                {name: "Grammaire", icon: "🔤", color: "#58D68D", iconBg: "#D5F5E3", page: "ScienceQuizPage.qml"},
+                {name: "Histoire simple", icon: "⏳", color: "#82E0AA", iconBg: "#E8F8F5", page: "HistoireQuizPage.qml"},
+                {name: "Géographie", icon: "🌍", color: "#3498DB", iconBg: "#EBF5FB", page: "GeographieQuizPage.qml"},
+                {name: "Écologie", icon: "🌎", color: "#27AE60", iconBg: "#D4EFDF", page: "MathsQuizPage.qml"},
+                {name: "Logique", icon: "💡", color: "#1ABC9C", iconBg: "#E8F6F3", page: "CultureQuizPage.qml"}
             ];
         } else {
             // Pour les 10 ans, on conserve les matières standard
             return [
-                {name: "Mathématiques", icon: "123", color: "#2979FF", iconBg: "#BBDEFB", page: "MathsQuizPage.qml"},
-                {name: "Culture Générale", icon: "?", color: "#F50057", iconBg: "#F8BBD0", page: "CultureQuizPage.qml"},
-                {name: "Sciences", icon: "⚗", color: "#00BFA5", iconBg: "#B2DFDB", page: "ScienceQuizPage.qml"},
-                {name: "Histoire", icon: "⏳", color: "#FFC107", iconBg: "#FFECB3", page: "HistoireQuizPage.qml"},
-                {name: "Géographie", icon: "🌍", color: "#673AB7", iconBg: "#D1C4E9", page: "GeographieQuizPage.qml"}
+                {name: "Mathématiques", icon: "123", color: "#2E86C1", iconBg: "#D6EAF8", page: "MathsQuizPage.qml"},
+                {name: "Culture Générale", icon: "?", color: "#1A5276", iconBg: "#AED6F1", page: "CultureQuizPage.qml"},
+                {name: "Sciences", icon: "⚗", color: "#58D68D", iconBg: "#D5F5E3", page: "ScienceQuizPage.qml"},
+                {name: "Histoire", icon: "⏳", color: "#82E0AA", iconBg: "#E8F8F5", page: "HistoireQuizPage.qml"},
+                {name: "Géographie", icon: "🌍", color: "#3498DB", iconBg: "#EBF5FB", page: "GeographieQuizPage.qml"}
             ];
         }
     }

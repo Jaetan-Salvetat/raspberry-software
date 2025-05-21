@@ -9,6 +9,7 @@ from PySide6.QtQml import QQmlApplicationEngine, QmlElement, QmlSingleton
 from controllers.settings_controller import SettingsController
 from controllers.wifi_controller import WifiController as WifiControllerFromControllers
 from controllers.volume_controller_fixed import VolumeController
+from controllers.brightness_controller import BrightnessController
 from wifi_manager_fixed import WifiManager
 from WifiController import WifiController  # Import direct depuis le dossier principal
 from QuizController import QuizController
@@ -158,6 +159,7 @@ def main():
     settings_controller = SettingsController()
     wifi_controller = WifiControllerFromControllers()  # Utiliser le contrôleur WiFi du dossier controllers
     volume_controller = VolumeController()  # Créer l'instance du contrôleur de volume
+    brightness_controller = BrightnessController()  # Créer l'instance du contrôleur de luminosité
     quiz_controller = QuizController()  # Créez l'instance
     csv_quiz_loader = CSVQuizLoader()  # Créer l'instance du nouveau chargeur CSV
     subject_loader = SubjectLoader()  # Créer l'instance du chargeur de matières
@@ -171,6 +173,7 @@ def main():
     engine.rootContext().setContextProperty("settingsController", settings_controller)
     engine.rootContext().setContextProperty("wifiController", wifi_controller)
     engine.rootContext().setContextProperty("volumeController", volume_controller)  # Exposer le contrôleur de volume
+    engine.rootContext().setContextProperty("brightnessController", brightness_controller)  # Exposer le contrôleur de luminosité
     engine.rootContext().setContextProperty("csvReader", csv_reader)
     engine.rootContext().setContextProperty("quizController", quiz_controller)  # Enregistrez-le
     engine.rootContext().setContextProperty("csvQuizLoader", csv_quiz_loader)  # Exposer le nouveau chargeur CSV
