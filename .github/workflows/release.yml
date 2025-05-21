@@ -56,13 +56,13 @@ jobs:
         with:
           nuitka-version: main
           script-name: main.py
-          mode: onefile
           enable-plugins: pyside6
           include-data-dir: |
             ui=ui
             quizzes=quizzes
           disable-console: false
           macos-create-app-bundle: false
+          onefile: true
       
       # Log build info
       - name: Log build info
