@@ -63,6 +63,7 @@ jobs:
             quizzes=quizzes
           disable-console: false
           macos-create-app-bundle: false
+          onefile: true
       
       # Log build info
       - name: Log build info
