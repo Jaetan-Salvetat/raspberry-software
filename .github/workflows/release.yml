@@ -52,16 +52,8 @@ jobs:
       
       # Build with Nuitka
       - name: Build with Nuitka
-        uses: Nuitka/Nuitka-Action@main
-        with:
-          nuitka-version: main
-          script-name: main.py
-          enable-plugins: pyside6
-          include-data-dir: |
-            ui=ui
-            quizzes=quizzes
-          disable-console: false
-          onefile: true
+        run: |
+          python -m nuitka --onefile --enable-plugin=pyside6 --include-data-dir=ui=ui --include-data-dir=quizzes=quizzes main.py
       
       # Log build info
       - name: Log build info
