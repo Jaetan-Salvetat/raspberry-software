@@ -1,6 +1,7 @@
 import sys
 import os
 import csv
+import subprocess
 from pathlib import Path
 from PySide6.QtCore import QObject, Slot, QUrl, Property, Signal
 from PySide6.QtGui import QGuiApplication, QIcon
@@ -150,6 +151,10 @@ def main():
     app.setApplicationName("LudoBot")
     app.setOrganizationName("LudoBot")
     app.setOrganizationDomain("ludobot.org")
+    
+    # Lancer le vérificateur de mise à jour en arrière-plan
+    update_checker_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "update_checker.py")
+    subprocess.Popen([sys.executable, update_checker_path], start_new_session=True)
     
     os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
     
