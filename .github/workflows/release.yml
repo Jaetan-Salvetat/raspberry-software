@@ -13,51 +13,85 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    
+    runs-on: ${{ matrix.os }}
+    
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - run: |
+          architecture: 'x64'
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirements*.txt
+      
+      # Install dependencies
+      - name: Install dependencies
+        run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1 libxcb1
+          sudo apt-get install -y libgl1 libxcb1 
           python -m pip install --upgrade pip
-          pip install cx_Freeze PySide6
+          pip install PySide6 ordered-set
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - run: |
-          # Vérifier l'espace disque initial
+      
+      # Check disk space before build
+      - name: Check disk space before build
+        run: |
           echo "===== ESPACE DISQUE AVANT BUILD ====="
           df -h
-          echo "================================="
-      - run: python setup.py build
-      - run: |
-          # Analyser la taille des dossiers après le build
+          echo "=================================="
+      
+      # Build with Nuitka
+      - name: Build with Nuitka
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          nuitka-version: main
+          script-name: LudoBot.py
+          onefile: false
+          standalone: true
+          enable-plugins: pyside6
+          include-data-dir: |
+            ui=ui
+            quizzes=quizzes
+          disable-console: false
+          macos-create-app-bundle: false
+      
+      # Log build info
+      - name: Log build info
+        run: |
           echo "===== TAILLE DES DOSSIERS ====="
           du -h --max-depth=1 .
           echo "===== CONTENU DU DOSSIER BUILD ====="
           du -h --max-depth=1 build/
-          if [ -d build/exe* ]; then
-            echo "===== CONTENU DU DOSSIER EXE ====="
-            du -h --max-depth=1 build/exe*/
-            echo "===== FICHIERS LES PLUS VOLUMINEUX ====="
-            find build -type f -size +50M | xargs ls -lh | sort -rh | head -n 10
-          fi
-      - run: |
+          echo "===== FICHIERS LES PLUS VOLUMINEUX ====="
+          find build -type f -size +10M | xargs ls -lh | sort -rh | head -n 10
+      
+      # Create installer script
+      - name: Create installer script
+        run: |
           cat > install.sh << 'EOF'
           #!/bin/bash
           SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
           INSTALL_DIR="$HOME/LudoBot"
           mkdir -p "$INSTALL_DIR"
           cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR"/
-          chmod +x "$INSTALL_DIR/LudoBot"
+          chmod +x "$INSTALL_DIR/LudoBot.bin"
           mkdir -p "$HOME/.config/autostart"
           cat > "$HOME/.config/autostart/ludobot.desktop" << EOL
           [Desktop Entry]
           Type=Application
           Name=LudoBot
           Comment=Application éducative pour enfants
-          Exec=$INSTALL_DIR/LudoBot
+          Exec=$INSTALL_DIR/LudoBot.bin
           Icon=$INSTALL_DIR/ui/assets/logo.png
           Terminal=false
           Categories=Education;
@@ -67,70 +101,57 @@ jobs:
           Type=Application
           Name=LudoBot
           Comment=Application éducative pour enfants
-          Exec=$INSTALL_DIR/LudoBot
+          Exec=$INSTALL_DIR/LudoBot.bin
           Icon=$INSTALL_DIR/ui/assets/logo.png
           Terminal=false
           Categories=Education;
           EOL
           chmod +x "$HOME/Desktop/LudoBot.desktop"
           echo "Installation terminée. LudoBot démarrera automatiquement au prochain démarrage."
-          echo "Pour lancer LudoBot maintenant, exécutez $INSTALL_DIR/LudoBot"
+          echo "Pour lancer LudoBot maintenant, exécutez $INSTALL_DIR/LudoBot.bin"
           EOF
           chmod +x install.sh
-      - run: |
+      
+      # Package release
+      - name: Package release
+        run: |
           mkdir -p release
-          if [ -d build/exe* ]; then
-            # Créer un dossier temporaire pour une version épurée
-            mkdir -p clean_release
-            
-            # Copier seulement les fichiers essentiels
-            cp -r build/exe*/LudoBot clean_release/
-            cp -r build/exe*/lib clean_release/
-            cp -r build/exe*/ui clean_release/
-            cp -r build/exe*/quizzes clean_release/
-            cp build/exe*/version.py clean_release/
-            cp build/exe*/update_checker.py clean_release/
-            cp install.sh clean_release/
-            
-            # Supprimer uniquement les fichiers PySide6 non utilisés
-            rm -rf clean_release/lib/PySide6/Qt3D*
-            rm -rf clean_release/lib/PySide6/QtWeb*
-            rm -rf clean_release/lib/PySide6/QtMultimedia*
-            rm -rf clean_release/lib/PySide6/QtTest*
-            rm -rf clean_release/lib/PySide6/QtSql*
-            rm -rf clean_release/lib/PySide6/QtXml*
-            rm -rf clean_release/lib/PySide6/QtSvg*
-            rm -rf clean_release/lib/PySide6/examples
-            
-            # Nettoyage général
-            find clean_release -name "__pycache__" -type d -exec rm -rf {} +
-            find clean_release -name "*.pyc" -delete
-            find clean_release -name "*.pyo" -delete
-            find clean_release -name "*.pyd" -delete
-            find clean_release -name "*.so.debug" -delete
-            find clean_release -name "*.a" -delete
-            find clean_release -type f -name "*.o" -delete
-            find clean_release -type f -size +10M | xargs ls -lh
-            
-            # Afficher la taille avant compression
-            echo "===== TAILLE FINALE AVANT COMPRESSION ====="
-            du -sh clean_release
-            
-            # Compression avec un niveau optimal
-            cd clean_release && zip -9r ../LudoBot-Linux.zip . && cd ..
-            
-            # Afficher la taille du ZIP
-            echo "===== TAILLE DU FICHIER ZIP ====="
-            ls -lh LudoBot-Linux.zip
-          else
-            echo "Build directory not found. Check if the build was successful."
-            exit 1
-          fi
+          
+          # Créer un dossier temporaire pour une version épurée
+          mkdir -p clean_release
+          
+          # Copier seulement les fichiers essentiels
+          cp -r build/LudoBot.dist/* clean_release/
+          cp install.sh clean_release/
+          
+          # Nettoyage général
+          find clean_release -name "__pycache__" -type d -exec rm -rf {} +
+          find clean_release -name "*.pyc" -delete
+          find clean_release -name "*.pyo" -delete
+          find clean_release -name "*.so.debug" -delete
+          find clean_release -name "*.a" -delete
+          find clean_release -type f -name "*.o" -delete
+          
+          # Afficher la taille avant compression
+          echo "===== TAILLE FINALE AVANT COMPRESSION ====="
+          du -sh clean_release
+          
+          # Compression avec un niveau optimal
+          cd clean_release && zip -9r ../LudoBot-Linux.zip . && cd ..
+          
+          # Afficher la taille du ZIP
+          echo "===== TAILLE DU FICHIER ZIP ====="
+          ls -lh LudoBot-Linux.zip
+      
+      # Get version
       - id: get_version
         run: |
           VERSION=$(python -c "with open('version.py', 'r') as f: exec(f.read()); print(VERSION)")
           echo "VERSION=v${VERSION}" >> $GITHUB_OUTPUT
-      - uses: softprops/action-gh-release@v1
+      
+      # Create GitHub release
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.get_version.outputs.VERSION }}
           name: Release ${{ steps.get_version.outputs.VERSION }}
